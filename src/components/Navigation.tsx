@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { AvatarDisplay } from './AvatarDisplay';
+import { NotificationBadge } from './NotificationBadge';
 import { Button } from './ui/button';
 import {
   Home,
@@ -13,7 +14,6 @@ import {
   Menu,
   X,
   Lightbulb,
-  Bell,
 } from 'lucide-react';
 import { useState } from 'react';
 import logoImage from '@/assets/logo.png';
@@ -66,8 +66,11 @@ export function Navigation() {
           <div className="hidden md:flex items-center gap-4">
             {user && profile ? (
               <div className="flex items-center gap-3">
-                <Link to="/profiel" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <AvatarDisplay avatarId={profile.avatar_id} size="sm" />
+                <Link to="/profiel" className="relative flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <div className="relative">
+                    <AvatarDisplay avatarId={profile.avatar_id} size="sm" />
+                    <NotificationBadge />
+                  </div>
                   <span className="font-medium">{profile.first_name}</span>
                 </Link>
                 <Button
