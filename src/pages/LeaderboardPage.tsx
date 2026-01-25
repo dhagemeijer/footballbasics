@@ -213,10 +213,15 @@ export default function LeaderboardPage() {
                       {entry.sessions_attended}
                     </div>
                     <div className={cn(
-                      'col-span-1 text-center font-medium',
+                      'col-span-1 text-center',
                       sortBy === 'crossbars_hit' && 'text-primary'
                     )}>
-                      {entry.crossbars_hit}
+                      <div className="font-medium">{entry.crossbars_hit}</div>
+                      {entry.sessions_attended > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          ({(entry.crossbars_hit / entry.sessions_attended).toFixed(1)}/tr)
+                        </div>
+                      )}
                     </div>
                     <div className={cn(
                       'col-span-2 text-center font-medium',
