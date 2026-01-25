@@ -12,6 +12,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import SuggestionsPage from "./pages/SuggestionsPage";
 import AdminPage from "./pages/AdminPage";
+import AdminTrainingsPage from "./pages/admin/AdminTrainingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +33,7 @@ const App = () => (
             <Route path="/profiel" element={<ProfilePage />} />
             <Route path="/suggesties" element={<SuggestionsPage />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/*" element={<AdminPage />} />
+            <Route path="/admin/trainingen" element={<AdminTrainingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
