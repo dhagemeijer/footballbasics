@@ -1,5 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { AvatarDisplay } from './AvatarDisplay';
 import { NotificationBadge } from './NotificationBadge';
