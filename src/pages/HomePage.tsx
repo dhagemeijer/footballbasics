@@ -1,22 +1,86 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
+import { supabase } from '@/integrations/supabase/client';
+import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
+import logo from '@/assets/logo.png';
 import { 
   Calendar, 
   Trophy, 
-  Users, 
   Zap, 
   Target,
   ArrowRight,
-  Sparkles,
   Medal
 } from 'lucide-react';
 
+interface HomeStats {
+  totalPlayerSessions: number;
+  totalTrainings: number;
+  totalCrossbars: number;
+}
+
 export default function HomePage() {
   const { user, profile, isLoading } = useAuth();
+  const [stats, setStats] = useState<HomeStats>({
+    totalPlayerSessions: 0,
+    totalTrainings: 0,
+    totalCrossbars: 0,
+  });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    // Fetch total sessions attended by players
+    const { data: playerRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'player');
+
+    const playerIds = (playerRoles || []).map(r => r.user_id);
+    
+    let totalPlayerSessions = 0;
+    let totalCrossbars = 0;
+    
+    if (playerIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('sessions_attended, crossbars_hit, user_id');
+      
+      (profiles || []).forEach(p => {
+        if (playerIds.includes(p.user_id)) {
+          totalPlayerSessions += p.sessions_attended || 0;
+        }
+        totalCrossbars += p.crossbars_hit || 0;
+      });
+    } else {
+      // If no explicit player roles, count all profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('sessions_attended, crossbars_hit');
+      
+      (profiles || []).forEach(p => {
+        totalPlayerSessions += p.sessions_attended || 0;
+        totalCrossbars += p.crossbars_hit || 0;
+      });
+    }
+
+    // Fetch total training sessions
+    const { count: trainingCount } = await supabase
+      .from('training_sessions')
+      .select('*', { count: 'exact', head: true });
+
+    setStats({
+      totalPlayerSessions,
+      totalTrainings: trainingCount || 0,
+      totalCrossbars,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -38,19 +102,14 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
         <div className="container mx-auto px-4 py-16 md:py-24 relative">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 animate-fade-in">
-              <Sparkles className="w-4 h-4" />
-              <span>Jeugd Voetbal Academie</span>
-            </div>
+            <img 
+              src={fbTextLogo} 
+              alt="Football Basics - more skills, more fun" 
+              className="h-24 md:h-32 mx-auto mb-8 animate-fade-in"
+            />
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-slide-in-up">
-              Welkom bij{' '}
-              <span className="text-gradient">Football Basics</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-slide-in-up stagger-1">
-              Leer voetballen, maak vrienden en word de beste speler die je kunt zijn!
-              Voor kinderen van 7-12 jaar.
+            <p className="text-lg md:text-xl text-white mb-8 animate-slide-in-up stagger-1">
+              Bij ons wordt voetbal echt leuk!
             </p>
 
             {user && profile ? (
@@ -99,8 +158,8 @@ export default function HomePage() {
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Wat kun je bij ons doen?
+        <h2 className="text-3xl font-bold text-center mb-12 text-white">
+          Wat kan je in de app doen?
         </h2>
         
         <div className="grid md:grid-cols-3 gap-6">
@@ -128,11 +187,10 @@ export default function HomePage() {
       {/* Stats Section */}
       <section className="bg-card py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <StatCard icon="⚽" value="100+" label="Spelers" />
-            <StatCard icon="🏃" value="50+" label="Trainingen" />
-            <StatCard icon="🏆" value="4" label="Trainers" />
-            <StatCard icon="⭐" value="5/5" label="Beoordeling" />
+          <div className="grid grid-cols-3 gap-6 text-center max-w-2xl mx-auto">
+            <StatCard icon="⚽" value={stats.totalPlayerSessions.toString()} label="Spelers" />
+            <StatCard icon="🏃" value={stats.totalTrainings.toString()} label="Trainingen" />
+            <StatCard icon="🥅" value={stats.totalCrossbars.toString()} label="Latjes" />
           </div>
         </div>
       </section>
@@ -164,8 +222,8 @@ export default function HomePage() {
       <footer className="border-t border-border py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           <p className="flex items-center justify-center gap-2">
-            <span className="text-2xl">⚽</span>
-            <span>Football Basics © 2024 - Jeugd Voetbal Academie</span>
+            <img src={logo} alt="Football Basics" className="h-8 w-8" />
+            <span>Football Basics © - More skills, more fun</span>
           </p>
         </div>
       </footer>
