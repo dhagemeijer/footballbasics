@@ -259,12 +259,12 @@ function FeatureCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <CardDescription className="text-base">{description}</CardDescription>
-        <Link to={linkTo}>
-          <Button variant="secondary" className="w-full gap-2">
+        <Button variant="secondary" className="w-full gap-2" asChild>
+          <Link to={linkTo}>
             {linkText}
             <ArrowRight className="w-4 h-4" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );
