@@ -14,13 +14,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, CalendarIcon, ArrowLeft, Trash2, CheckCircle } from 'lucide-react';
+import { Loader2, Plus, CalendarIcon, ArrowLeft, Trash2, CheckCircle, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
+
+interface TrainingSession {
+  id: string;
+  title: string;
+  description: string | null;
+  session_date: string;
+  session_time: string;
+  location: string | null;
+  max_participants: number | null;
+  is_completed: boolean;
+  created_by: string | null;
+  created_at: string | null;
+}
 
 const LOCATIONS = [
   { value: 'Forum Sport - veld 1', label: 'Forum Sport - veld 1' },
@@ -37,13 +51,26 @@ export default function AdminTrainingsPage() {
   const queryClient = useQueryClient();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingSession, setEditingSession] = useState<string | null>(null);
   
   // Form state
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState('19:00');
   const [selectedLocation, setSelectedLocation] = useState('Forum Sport - veld 1');
   const [focus, setFocus] = useState(DEFAULT_FOCUS);
+  const [maxParticipants, setMaxParticipants] = useState(20);
+  
+  // Edit state
+  const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editDate, setEditDate] = useState<Date | undefined>(undefined);
+  const [editTime, setEditTime] = useState('19:00');
+  const [editLocation, setEditLocation] = useState('Forum Sport - veld 1');
+  const [editFocus, setEditFocus] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editMaxParticipants, setEditMaxParticipants] = useState(20);
+  
+  // Delete confirmation state
+  const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
 
   // Fetch training sessions
   const { data: sessions, isLoading: sessionsLoading } = useQuery({
@@ -112,6 +139,42 @@ export default function AdminTrainingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-training-sessions'] });
       toast({ title: 'Training verwijderd', description: 'De training is succesvol verwijderd.' });
+      setDeleteSessionId(null);
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Update training session mutation
+  const updateMutation = useMutation({
+    mutationFn: async (updatedSession: {
+      id: string;
+      title: string;
+      description: string;
+      session_date: string;
+      session_time: string;
+      location: string;
+      max_participants: number;
+    }) => {
+      const { error } = await supabase
+        .from('training_sessions')
+        .update({
+          title: updatedSession.title,
+          description: updatedSession.description,
+          session_date: updatedSession.session_date,
+          session_time: updatedSession.session_time,
+          location: updatedSession.location,
+          max_participants: updatedSession.max_participants,
+        })
+        .eq('id', updatedSession.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-training-sessions'] });
+      toast({ title: 'Training bijgewerkt', description: 'De training is succesvol aangepast.' });
+      setIsEditDialogOpen(false);
+      setEditingSession(null);
     },
     onError: (error) => {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
@@ -121,9 +184,9 @@ export default function AdminTrainingsPage() {
   const resetForm = () => {
     setSelectedDate(undefined);
     setSelectedTime('19:00');
-    setSelectedLocation('Forum Sport');
+    setSelectedLocation('Forum Sport - veld 1');
     setFocus(DEFAULT_FOCUS);
-    setEditingSession(null);
+    setMaxParticipants(20);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -143,9 +206,43 @@ export default function AdminTrainingsPage() {
     });
   };
 
+  const handleEdit = (session: TrainingSession) => {
+    setEditingSession(session);
+    setEditDate(new Date(session.session_date));
+    setEditTime(session.session_time.slice(0, 5));
+    setEditLocation(session.location || 'Forum Sport - veld 1');
+    setEditFocus(session.description || '');
+    setEditTitle(session.title);
+    setEditMaxParticipants(session.max_participants || 20);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingSession || !editDate) {
+      toast({ title: 'Fout', description: 'Selecteer een datum', variant: 'destructive' });
+      return;
+    }
+
+    updateMutation.mutate({
+      id: editingSession.id,
+      title: editTitle,
+      description: editFocus,
+      session_date: format(editDate, 'yyyy-MM-dd'),
+      session_time: editTime,
+      location: editLocation,
+      max_participants: editMaxParticipants,
+    });
+  };
+
   const handleDelete = (sessionId: string) => {
-    if (confirm('Weet je zeker dat je deze training wilt verwijderen?')) {
-      deleteMutation.mutate(sessionId);
+    setDeleteSessionId(sessionId);
+  };
+
+  const confirmDelete = () => {
+    if (deleteSessionId) {
+      deleteMutation.mutate(deleteSessionId);
     }
   };
 
@@ -320,14 +417,23 @@ export default function AdminTrainingsPage() {
                         {session.description || '-'}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(session.id)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(session as TrainingSession)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(session.id)}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -340,6 +446,146 @@ export default function AdminTrainingsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) setEditingSession(null);
+        }}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Training Bewerken</DialogTitle>
+              <DialogDescription>
+                Pas de details van de training aan.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEditSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="editTitle">Titel</Label>
+                <Input
+                  id="editTitle"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Training titel"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Datum</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {editDate ? format(editDate, "EEEE d MMMM yyyy", { locale: nl }) : "Selecteer datum"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={editDate}
+                      onSelect={setEditDate}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editTime">Tijd</Label>
+                <Input
+                  id="editTime"
+                  type="time"
+                  value={editTime}
+                  onChange={(e) => setEditTime(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Locatie</Label>
+                <Select value={editLocation} onValueChange={setEditLocation}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecteer locatie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCATIONS.map((loc) => (
+                      <SelectItem key={loc.value} value={loc.value}>
+                        {loc.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editFocus">Focus van de training</Label>
+                <Textarea
+                  id="editFocus"
+                  value={editFocus}
+                  onChange={(e) => setEditFocus(e.target.value.slice(0, 200))}
+                  placeholder="Bijv. Balcontrole & traptechniek"
+                  maxLength={200}
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground text-right">{editFocus.length}/200</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editMaxParticipants">Max. aantal deelnemers</Label>
+                <Input
+                  id="editMaxParticipants"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={editMaxParticipants}
+                  onChange={(e) => setEditMaxParticipants(parseInt(e.target.value) || 20)}
+                />
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Annuleren
+                </Button>
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : null}
+                  Opslaan
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteSessionId} onOpenChange={(open) => !open && setDeleteSessionId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Training verwijderen?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Weet je zeker dat je deze training wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuleren</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Verwijderen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
