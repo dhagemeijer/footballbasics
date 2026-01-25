@@ -8,6 +8,7 @@ import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 import logo from '@/assets/logo.png';
+import goalIcon from '@/assets/goal-icon.png';
 import { 
   Calendar, 
   Trophy, 
@@ -190,7 +191,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-6 text-center max-w-2xl mx-auto">
             <StatCard icon="⚽" value={stats.totalPlayerSessions.toString()} label="Spelers" />
             <StatCard icon="🏃" value={stats.totalTrainings.toString()} label="Trainingen" />
-            <StatCard icon="🥅" value={stats.totalCrossbars.toString()} label="Latjes" />
+            <StatCard icon={<img src={goalIcon} alt="Doel" className="h-10 w-10 mx-auto" />} value={stats.totalCrossbars.toString()} label="Latjes" />
           </div>
         </div>
       </section>
@@ -257,10 +258,12 @@ function FeatureCard({
   );
 }
 
-function StatCard({ icon, value, label }: { icon: string; value: string; label: string }) {
+function StatCard({ icon, value, label }: { icon: string | React.ReactNode; value: string; label: string }) {
   return (
     <div className="animate-fade-in">
-      <div className="text-4xl mb-2">{icon}</div>
+      <div className="text-4xl mb-2 flex justify-center">
+        {typeof icon === 'string' ? icon : icon}
+      </div>
       <div className="text-3xl font-bold text-primary">{value}</div>
       <div className="text-muted-foreground">{label}</div>
     </div>
