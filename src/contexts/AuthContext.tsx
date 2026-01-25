@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (data.user) {
-      // Create profile
+      // Create profile - the player role is automatically assigned by a database trigger
       const { error: profileError } = await supabase.from('profiles').insert({
         user_id: data.user.id,
         username: username,
@@ -141,16 +141,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (profileError) {
         return { error: new Error(profileError.message) };
-      }
-
-      // Assign player role
-      const { error: roleError } = await supabase.from('user_roles').insert({
-        user_id: data.user.id,
-        role: 'player',
-      });
-
-      if (roleError) {
-        return { error: new Error(roleError.message) };
       }
     }
 
