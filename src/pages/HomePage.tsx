@@ -224,7 +224,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           <p className="flex items-center justify-center gap-2">
             <img src={logo} alt="Football Basics" className="h-8 w-8" />
-            <span>Football Basics © - More skills, more fun</span>
+            <span>© 2026 | Football Basics - More skills, more fun</span>
           </p>
         </div>
       </footer>
