@@ -7,7 +7,8 @@ import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Loader2, Trophy, Zap, Target, Medal, Filter, User } from 'lucide-react';
+import { Loader2, Trophy, Zap, Target, Medal, Filter, User, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface LeaderboardEntry {
@@ -31,6 +32,7 @@ export default function LeaderboardPage() {
   const [sortBy, setSortBy] = useState<SortField>('sessions_attended');
   const [showTrainers, setShowTrainers] = useState(true);
   const [showPlayers, setShowPlayers] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchLeaderboard();
@@ -80,11 +82,12 @@ export default function LeaderboardPage() {
     setIsLoading(false);
   };
 
-  // Filter entries based on role selection
+  // Filter entries based on role selection and search query
   const filteredEntries = entries.filter(entry => {
     const isTrainer = entry.role === 'trainer' || entry.role === 'admin';
-    if (isTrainer) return showTrainers;
-    return showPlayers;
+    const matchesRole = isTrainer ? showTrainers : showPlayers;
+    const matchesSearch = entry.first_name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesRole && matchesSearch;
   });
 
   const sortedEntries = [...filteredEntries].sort((a, b) => b[sortBy] - a[sortBy]);
@@ -143,6 +146,18 @@ export default function LeaderboardPage() {
               </div>
             </div>
           )}
+
+          {/* Search Input */}
+          <div className="relative max-w-sm mx-auto mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Zoek op naam..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
           {/* Sort Buttons */}
           <div className="flex flex-wrap justify-center gap-2 mb-4">
