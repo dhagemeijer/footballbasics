@@ -10,7 +10,7 @@ import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { AvatarSelector } from '@/components/AvatarSelector';
 import { AdminSuggestionsSection } from '@/components/admin/AdminSuggestionsSection';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Eye, EyeOff, Trophy, Target, Zap } from 'lucide-react';
+import { Loader2, Save, Eye, EyeOff, Trophy, Target, Zap, Ticket, AlertCircle } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function ProfilePage() {
@@ -145,6 +145,40 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Strippenkaart - Only for players (non-trainers/admins) */}
+          {!isTrainerOrAdmin && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Ticket className="w-5 h-5 text-primary" />
+                  Mijn Strippenkaart
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const trainingsRemaining = (profile?.session_quota || 0) - (profile?.sessions_attended || 0);
+                  const isLow = trainingsRemaining <= 0;
+                  return (
+                    <div className={`bg-secondary/50 rounded-lg p-6 text-center ${isLow ? 'border-2 border-destructive' : ''}`}>
+                      <div className={`text-4xl font-bold ${isLow ? 'text-destructive' : 'text-primary'}`}>
+                        <span className="inline-flex items-center gap-2">
+                          {trainingsRemaining}
+                          {isLow && <AlertCircle className="w-8 h-8" />}
+                        </span>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-2">
+                        trainingen over
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        ({profile?.sessions_attended || 0} van {profile?.session_quota || 0} gebruikt)
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats */}
           <Card>
