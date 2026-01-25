@@ -16,6 +16,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { useState } from 'react';
+import logoImage from '@/assets/logo.jpg';
 
 export function Navigation() {
   const { user, profile, isTrainerOrAdmin, signOut } = useAuth();
@@ -38,14 +39,8 @@ export function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <span className="text-3xl">⚽</span>
-            <div>
-              <h1 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors">
-                Football Basics
-              </h1>
-              <p className="text-xs text-muted-foreground -mt-1">Jeugd Academie</p>
-            </div>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img src={logoImage} alt="Football Basics" className="h-10 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
