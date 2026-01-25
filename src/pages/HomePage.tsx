@@ -125,16 +125,10 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <Link to="/trainingen">
+                  <Link to="/profiel">
                     <Button size="lg" className="gap-2">
-                      <Calendar className="w-5 h-5" />
-                      Bekijk Trainingen
-                    </Button>
-                  </Link>
-                  <Link to="/ranglijst">
-                    <Button size="lg" variant="secondary" className="gap-2">
-                      <Trophy className="w-5 h-5" />
-                      Ranglijst
+                      Naar mijn profiel
+                      <ArrowRight className="w-5 h-5" />
                     </Button>
                   </Link>
                 </div>
@@ -169,20 +163,26 @@ export default function HomePage() {
           <FeatureCard
             icon={Calendar}
             title="Trainingen"
-            description="Schrijf je in voor leuke trainingen en oefen met je teamgenoten!"
+            description="Meld je aan voor leuke trainingen en word nog beter!"
             delay="stagger-1"
-          />
-          <FeatureCard
-            icon={Target}
-            title="Statistieken"
-            description="Houd je prestaties bij: doelpunten, snelheid, en meer!"
-            delay="stagger-2"
+            linkTo="/trainingen"
+            linkText="Bekijk trainingen"
           />
           <FeatureCard
             icon={Trophy}
             title="Ranglijst"
-            description="Bekijk hoe je het doet vergeleken met andere spelers!"
+            description="Bekijk hoe vaak er al op de lat is geschoten."
+            delay="stagger-2"
+            linkTo="/ranglijst"
+            linkText="Bekijk ranglijst"
+          />
+          <FeatureCard
+            icon={Target}
+            title="Suggesties"
+            description="Geef aan waar je op zou willen trainen."
             delay="stagger-3"
+            linkTo="/suggesties"
+            linkText="Geef suggestie"
           />
         </div>
       </section>
@@ -238,12 +238,16 @@ function FeatureCard({
   icon: Icon, 
   title, 
   description, 
-  delay 
+  delay,
+  linkTo,
+  linkText
 }: { 
   icon: React.ComponentType<{ className?: string }>; 
   title: string; 
   description: string;
   delay: string;
+  linkTo: string;
+  linkText: string;
 }) {
   return (
     <Card className={`hover-lift animate-slide-in-up ${delay}`}>
@@ -253,8 +257,14 @@ function FeatureCard({
         </div>
         <CardTitle className="text-xl">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <CardDescription className="text-base">{description}</CardDescription>
+        <Link to={linkTo}>
+          <Button variant="secondary" className="w-full gap-2">
+            {linkText}
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
