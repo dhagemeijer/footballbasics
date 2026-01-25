@@ -23,8 +23,8 @@ export default function AdminPage() {
   }
 
   const adminCards = [
-    { icon: Calendar, title: 'Trainingen Beheren', description: 'Maak en bewerk trainingen', to: '/admin/trainingen' },
-    { icon: Users, title: 'Spelers Beheren', description: 'Bekijk en bewerk spelers', to: '/admin/spelers' },
+    { icon: Calendar, title: 'Trainingen beheren', description: 'Maak en bewerk trainingen', to: '/admin/trainingen' },
+    { icon: Users, title: 'Spelers beheren', description: 'Bekijk en bewerk spelers', to: '/admin/spelers' },
     { icon: Trophy, title: 'Statistieken Invoeren', description: 'Voer aanwezigheid en stats in', to: '/admin/stats' },
   ];
 
