@@ -25,6 +25,11 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    // Refresh profile on mount to ensure fresh data
+    refreshProfile();
+  }, []);
+
+  useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name);
       setAvatarId(profile.avatar_id);
@@ -120,9 +125,9 @@ export default function ProfilePage() {
 
   const stats = [
     { icon: Trophy, label: 'Trainingen', value: profile?.sessions_attended || 0, unit: '' },
-    { icon: Target, label: 'Lat-raak', value: profile?.crossbars_hit || 0, unit: 'x' },
-    { icon: Zap, label: 'Snelste sprint', value: profile?.running_speed || 0, unit: ' km/h' },
-    { icon: Zap, label: 'Hardste schot', value: profile?.shooting_speed || 0, unit: ' km/h' },
+    { icon: Target, label: 'Latjes', value: profile?.crossbars_hit || 0, unit: '' },
+    { icon: Zap, label: 'Schotkracht', value: profile?.shooting_speed || 0, unit: ' km/u' },
+    { icon: Zap, label: 'Snelheid', value: profile?.running_speed || 0, unit: ' km/u' },
   ];
 
   return (
