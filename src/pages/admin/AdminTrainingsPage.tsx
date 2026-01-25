@@ -17,8 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, CalendarIcon, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, Plus, CalendarIcon, ArrowLeft, Trash2, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
 
 const LOCATIONS = [
@@ -78,6 +79,24 @@ export default function AdminTrainingsPage() {
       toast({ title: 'Training aangemaakt', description: 'De training is succesvol toegevoegd.' });
       resetForm();
       setIsDialogOpen(false);
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Toggle completed status mutation
+  const toggleCompletedMutation = useMutation({
+    mutationFn: async ({ sessionId, isCompleted }: { sessionId: string; isCompleted: boolean }) => {
+      const { error } = await supabase
+        .from('training_sessions')
+        .update({ is_completed: isCompleted })
+        .eq('id', sessionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-training-sessions'] });
+      toast({ title: 'Status bijgewerkt', description: 'De training status is aangepast.' });
     },
     onError: (error) => {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
@@ -267,6 +286,7 @@ export default function AdminTrainingsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[60px]">Afgerond</TableHead>
                     <TableHead>Datum</TableHead>
                     <TableHead>Tijd</TableHead>
                     <TableHead>Locatie</TableHead>
@@ -276,12 +296,26 @@ export default function AdminTrainingsPage() {
                 </TableHeader>
                 <TableBody>
                   {sessions.map((session) => (
-                    <TableRow key={session.id}>
+                    <TableRow key={session.id} className={session.is_completed ? 'opacity-60' : ''}>
                       <TableCell>
-                        {format(new Date(session.session_date), "EEEE d MMMM", { locale: nl })}
+                        <Checkbox
+                          checked={session.is_completed}
+                          onCheckedChange={(checked) => 
+                            toggleCompletedMutation.mutate({ 
+                              sessionId: session.id, 
+                              isCompleted: checked as boolean 
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {session.is_completed && <CheckCircle className="w-4 h-4 text-green-500" />}
+                          {format(new Date(session.session_date), "EEEE d MMMM", { locale: nl })}
+                        </div>
                       </TableCell>
                       <TableCell>{session.session_time.slice(0, 5)}</TableCell>
-                      <TableCell>{(session as any).location || 'Forum Sport'}</TableCell>
+                      <TableCell>{session.location || 'Forum Sport'}</TableCell>
                       <TableCell className="max-w-[200px] truncate">
                         {session.description || '-'}
                       </TableCell>

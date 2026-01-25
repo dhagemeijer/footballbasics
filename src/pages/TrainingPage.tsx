@@ -18,6 +18,7 @@ interface TrainingSession {
   session_time: string;
   max_participants: number;
   created_at: string;
+  is_completed: boolean;
   signup_count?: number;
   user_signed_up?: boolean;
 }
@@ -148,8 +149,10 @@ export default function TrainingPage() {
     return isBefore(parseISO(date), new Date());
   };
 
-  const upcomingSessions = sessions.filter(s => !isPastSession(s.session_date));
-  const pastSessions = sessions.filter(s => isPastSession(s.session_date));
+  // Filter out completed sessions from the regular view
+  const activeSessions = sessions.filter(s => !s.is_completed);
+  const upcomingSessions = activeSessions.filter(s => !isPastSession(s.session_date));
+  const pastSessions = activeSessions.filter(s => isPastSession(s.session_date));
 
   if (isLoading) {
     return (
