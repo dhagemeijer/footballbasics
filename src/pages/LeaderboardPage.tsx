@@ -166,23 +166,23 @@ export default function LeaderboardPage() {
                 key={field}
                 onClick={() => setSortBy(field)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all',
+                  'flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg font-medium transition-all text-sm sm:text-base',
                   sortBy === field
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-card text-muted-foreground hover:bg-secondary'
                 )}
               >
                 <Icon className="w-4 h-4" />
-                {label}
+                <span className="hidden sm:inline">{label}</span>
               </button>
             ))}
           </div>
 
           {/* Filter Options */}
           <div className="flex justify-center gap-6 mb-8">
-            <div className="flex items-center gap-2 bg-card rounded-lg px-4 py-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 bg-card rounded-lg px-3 sm:px-4 py-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground mr-2">Toon:</span>
+              <span className="text-sm text-muted-foreground mr-2 hidden sm:inline">Toon:</span>
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="show-trainers"
@@ -193,7 +193,7 @@ export default function LeaderboardPage() {
                   Trainers
                 </Label>
               </div>
-              <div className="flex items-center gap-2 ml-4">
+              <div className="flex items-center gap-2 ml-2 sm:ml-4">
                 <Checkbox
                   id="show-players"
                   checked={showPlayers}
@@ -206,9 +206,9 @@ export default function LeaderboardPage() {
             </div>
           </div>
 
-          {/* Leaderboard */}
+          {/* Leaderboard - Desktop Header */}
           <Card>
-            <CardHeader className="pb-0">
+            <CardHeader className="pb-0 hidden md:block">
               <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground px-4">
                 <div className="col-span-1">#</div>
                 <div className="col-span-4">Speler</div>
@@ -250,7 +250,7 @@ export default function LeaderboardPage() {
                 </button>
               </div>
             </CardHeader>
-            <CardContent className="divide-y divide-border">
+            <CardContent className="divide-y divide-border p-0 sm:p-6">
               {sortedEntries.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   Nog geen spelers in de ranglijst.
@@ -259,73 +259,133 @@ export default function LeaderboardPage() {
                 sortedEntries.map((entry, index) => {
                   const isCurrentUser = user && entry.user_id === user.id;
                   return (
-                  <div
-                    key={entry.id}
-                    className={cn(
-                      'grid grid-cols-12 gap-4 items-center py-4 px-4 relative',
-                      index < 3 && 'bg-primary/5',
-                      isCurrentUser && 'bg-accent ring-2 ring-primary ring-inset'
-                    )}
-                  >
-                    <div className="col-span-1">
-                      {index === 0 ? (
-                        <span className="text-2xl">🥇</span>
-                      ) : index === 1 ? (
-                        <span className="text-2xl">🥈</span>
-                      ) : index === 2 ? (
-                        <span className="text-2xl">🥉</span>
-                      ) : (
-                        <span className="text-lg font-bold text-muted-foreground">
-                          {index + 1}
-                        </span>
-                      )}
-                    </div>
-                    <div className="col-span-4 flex items-center gap-3">
-                      <AvatarDisplay avatarId={entry.avatar_id} size="sm" />
-                      <div className="flex items-center flex-wrap gap-1">
-                        <span className="font-medium">{entry.first_name}</span>
-                        {isCurrentUser && (
-                          <Badge variant="default" className="text-xs">
-                            Jij
-                          </Badge>
+                    <div key={entry.id}>
+                      {/* Desktop Row */}
+                      <div
+                        className={cn(
+                          'hidden md:grid grid-cols-12 gap-4 items-center py-4 px-4 relative',
+                          index < 3 && 'bg-primary/5',
+                          isCurrentUser && 'bg-accent ring-2 ring-primary ring-inset'
                         )}
-                        {entry.role !== 'player' && (
-                          <Badge variant="secondary" className="text-xs">
-                            {entry.role === 'admin' ? 'Admin' : 'Trainer'}
-                          </Badge>
+                      >
+                        <div className="col-span-1">
+                          {index === 0 ? (
+                            <span className="text-2xl">🥇</span>
+                          ) : index === 1 ? (
+                            <span className="text-2xl">🥈</span>
+                          ) : index === 2 ? (
+                            <span className="text-2xl">🥉</span>
+                          ) : (
+                            <span className="text-lg font-bold text-muted-foreground">
+                              {index + 1}
+                            </span>
+                          )}
+                        </div>
+                        <div className="col-span-4 flex items-center gap-3">
+                          <AvatarDisplay avatarId={entry.avatar_id} size="sm" />
+                          <div className="flex items-center flex-wrap gap-1">
+                            <span className="font-medium">{entry.first_name}</span>
+                            {isCurrentUser && (
+                              <Badge variant="default" className="text-xs">
+                                Jij
+                              </Badge>
+                            )}
+                            {entry.role !== 'player' && (
+                              <Badge variant="secondary" className="text-xs">
+                                {entry.role === 'admin' ? 'Admin' : 'Trainer'}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className={cn(
+                          'col-span-2 text-center font-medium',
+                          sortBy === 'sessions_attended' && 'text-primary'
+                        )}>
+                          {entry.sessions_attended}
+                        </div>
+                        <div className={cn(
+                          'col-span-1 text-center',
+                          sortBy === 'crossbars_hit' && 'text-primary'
+                        )}>
+                          <div className="font-medium">{entry.crossbars_hit}</div>
+                          {entry.sessions_attended > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              ({(entry.crossbars_hit / entry.sessions_attended).toFixed(1)}/tr)
+                            </div>
+                          )}
+                        </div>
+                        <div className={cn(
+                          'col-span-2 text-center font-medium',
+                          sortBy === 'shooting_speed' && 'text-primary'
+                        )}>
+                          {entry.shooting_speed > 0 ? `${entry.shooting_speed}` : '-'}
+                        </div>
+                        <div className={cn(
+                          'col-span-2 text-center font-medium',
+                          sortBy === 'running_speed' && 'text-primary'
+                        )}>
+                          {entry.running_speed > 0 ? `${entry.running_speed}` : '-'}
+                        </div>
+                      </div>
+
+                      {/* Mobile Row - Compact Card */}
+                      <div
+                        className={cn(
+                          'md:hidden flex items-center gap-3 p-3',
+                          index < 3 && 'bg-primary/5',
+                          isCurrentUser && 'bg-accent ring-2 ring-primary ring-inset'
                         )}
+                      >
+                        {/* Rank */}
+                        <div className="flex-shrink-0 w-8 text-center">
+                          {index === 0 ? (
+                            <span className="text-xl">🥇</span>
+                          ) : index === 1 ? (
+                            <span className="text-xl">🥈</span>
+                          ) : index === 2 ? (
+                            <span className="text-xl">🥉</span>
+                          ) : (
+                            <span className="text-base font-bold text-muted-foreground">
+                              {index + 1}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Avatar */}
+                        <AvatarDisplay avatarId={entry.avatar_id} size="sm" />
+
+                        {/* Name and badges */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="font-medium truncate">{entry.first_name}</span>
+                            {isCurrentUser && (
+                              <Badge variant="default" className="text-xs">Jij</Badge>
+                            )}
+                            {entry.role !== 'player' && (
+                              <Badge variant="secondary" className="text-xs">
+                                {entry.role === 'admin' ? 'Admin' : 'Trainer'}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Current Sort Value - Highlighted */}
+                        <div className="flex-shrink-0 text-right">
+                          <div className="text-lg font-bold text-primary">
+                            {sortBy === 'sessions_attended' && entry.sessions_attended}
+                            {sortBy === 'crossbars_hit' && entry.crossbars_hit}
+                            {sortBy === 'shooting_speed' && (entry.shooting_speed > 0 ? entry.shooting_speed : '-')}
+                            {sortBy === 'running_speed' && (entry.running_speed > 0 ? entry.running_speed : '-')}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {sortBy === 'sessions_attended' && 'trainingen'}
+                            {sortBy === 'crossbars_hit' && 'latjes'}
+                            {sortBy === 'shooting_speed' && 'km/u'}
+                            {sortBy === 'running_speed' && 'km/u'}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className={cn(
-                      'col-span-2 text-center font-medium',
-                      sortBy === 'sessions_attended' && 'text-primary'
-                    )}>
-                      {entry.sessions_attended}
-                    </div>
-                    <div className={cn(
-                      'col-span-1 text-center',
-                      sortBy === 'crossbars_hit' && 'text-primary'
-                    )}>
-                      <div className="font-medium">{entry.crossbars_hit}</div>
-                      {entry.sessions_attended > 0 && (
-                        <div className="text-xs text-muted-foreground">
-                          ({(entry.crossbars_hit / entry.sessions_attended).toFixed(1)}/tr)
-                        </div>
-                      )}
-                    </div>
-                    <div className={cn(
-                      'col-span-2 text-center font-medium',
-                      sortBy === 'shooting_speed' && 'text-primary'
-                    )}>
-                      {entry.shooting_speed > 0 ? `${entry.shooting_speed}` : '-'}
-                    </div>
-                    <div className={cn(
-                      'col-span-2 text-center font-medium',
-                      sortBy === 'running_speed' && 'text-primary'
-                    )}>
-                      {entry.running_speed > 0 ? `${entry.running_speed}` : '-'}
-                    </div>
-                  </div>
                   );
                 })
               )}
