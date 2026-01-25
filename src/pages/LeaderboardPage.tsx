@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Loader2, Trophy, Zap, Target, Medal, Filter } from 'lucide-react';
+import { Loader2, Trophy, Zap, Target, Medal, Filter, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LeaderboardEntry {
   id: string;
+  user_id: string;
   first_name: string;
   avatar_id: number;
   sessions_attended: number;
@@ -23,6 +25,7 @@ interface LeaderboardEntry {
 type SortField = 'sessions_attended' | 'crossbars_hit' | 'running_speed' | 'shooting_speed';
 
 export default function LeaderboardPage() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortField>('sessions_attended');
@@ -63,6 +66,7 @@ export default function LeaderboardPage() {
 
     const leaderboard: LeaderboardEntry[] = (profiles || []).map(profile => ({
       id: profile.id,
+      user_id: profile.user_id,
       first_name: profile.first_name,
       avatar_id: profile.avatar_id || 1,
       sessions_attended: profile.sessions_attended || 0,
@@ -84,6 +88,15 @@ export default function LeaderboardPage() {
   });
 
   const sortedEntries = [...filteredEntries].sort((a, b) => b[sortBy] - a[sortBy]);
+
+  // Find current user's position in the full sorted list (not filtered)
+  const allSortedEntries = [...entries].sort((a, b) => b[sortBy] - a[sortBy]);
+  const currentUserPosition = user 
+    ? allSortedEntries.findIndex(e => e.user_id === user.id) + 1 
+    : 0;
+  const currentUserInList = user 
+    ? sortedEntries.find(e => e.user_id === user.id) 
+    : null;
 
   const sortButtons: { field: SortField; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { field: 'sessions_attended', label: 'Trainingen', icon: Medal },
@@ -115,6 +128,21 @@ export default function LeaderboardPage() {
               Bekijk hoe je het doet vergeleken met andere spelers!
             </p>
           </div>
+
+          {/* Current User Position Indicator */}
+          {user && currentUserPosition > 0 && (
+            <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+              <div className="flex items-center justify-center gap-3">
+                <User className="w-5 h-5 text-primary" />
+                <span className="font-medium">
+                  Jouw positie: <span className="text-primary font-bold text-lg">#{currentUserPosition}</span>
+                </span>
+                <span className="text-muted-foreground">
+                  van {entries.length} spelers
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Sort Buttons */}
           <div className="flex flex-wrap justify-center gap-2 mb-4">
@@ -213,12 +241,15 @@ export default function LeaderboardPage() {
                   Nog geen spelers in de ranglijst.
                 </div>
               ) : (
-                sortedEntries.map((entry, index) => (
+                sortedEntries.map((entry, index) => {
+                  const isCurrentUser = user && entry.user_id === user.id;
+                  return (
                   <div
                     key={entry.id}
                     className={cn(
-                      'grid grid-cols-12 gap-4 items-center py-4 px-4',
-                      index < 3 && 'bg-primary/5'
+                      'grid grid-cols-12 gap-4 items-center py-4 px-4 relative',
+                      index < 3 && 'bg-primary/5',
+                      isCurrentUser && 'bg-accent ring-2 ring-primary ring-inset'
                     )}
                   >
                     <div className="col-span-1">
@@ -236,10 +267,15 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="col-span-4 flex items-center gap-3">
                       <AvatarDisplay avatarId={entry.avatar_id} size="sm" />
-                      <div>
+                      <div className="flex items-center flex-wrap gap-1">
                         <span className="font-medium">{entry.first_name}</span>
+                        {isCurrentUser && (
+                          <Badge variant="default" className="text-xs">
+                            Jij
+                          </Badge>
+                        )}
                         {entry.role !== 'player' && (
-                          <Badge variant="secondary" className="ml-2 text-xs">
+                          <Badge variant="secondary" className="text-xs">
                             {entry.role === 'admin' ? 'Admin' : 'Trainer'}
                           </Badge>
                         )}
@@ -275,7 +311,8 @@ export default function LeaderboardPage() {
                       {entry.running_speed > 0 ? `${entry.running_speed}` : '-'}
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </CardContent>
           </Card>
