@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 import logo from '@/assets/logo.png';
 import goalIcon from '@/assets/goal-icon.png';
+import playerIcon from '@/assets/player-icon.png';
+import footballIcon from '@/assets/football-icon.png';
 import { 
   Calendar, 
   Trophy, 
@@ -186,12 +188,12 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-card py-16">
+      <section className="bg-black py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-3 gap-6 text-center max-w-2xl mx-auto">
-            <StatCard icon="⚽" value={stats.totalPlayerSessions.toString()} label="Spelers" />
-            <StatCard icon="🏃" value={stats.totalTrainings.toString()} label="Trainingen" />
-            <StatCard icon={<img src={goalIcon} alt="Doel" className="h-10 w-10 mx-auto" />} value={stats.totalCrossbars.toString()} label="Latjes" />
+            <StatCard icon={<img src={playerIcon} alt="Spelers" className="h-10 w-10 mx-auto" />} value={stats.totalPlayerSessions.toString()} label="Spelers" />
+            <StatCard icon={<img src={footballIcon} alt="Trainingen" className="h-10 w-10 mx-auto" />} value={stats.totalTrainings.toString()} label="Trainingen" />
+            <StatCard icon={<img src={goalIcon} alt="Latjes" className="h-10 w-10 mx-auto" />} value={stats.totalCrossbars.toString()} label="Latjes" />
           </div>
         </div>
       </section>
