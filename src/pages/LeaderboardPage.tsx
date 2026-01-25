@@ -76,9 +76,9 @@ export default function LeaderboardPage() {
 
   const sortButtons: { field: SortField; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { field: 'sessions_attended', label: 'Trainingen', icon: Medal },
-    { field: 'crossbars_hit', label: 'Lat-raak', icon: Target },
+    { field: 'crossbars_hit', label: 'Latjes', icon: Target },
+    { field: 'shooting_speed', label: 'Schotkracht', icon: Trophy },
     { field: 'running_speed', label: 'Snelheid', icon: Zap },
-    { field: 'shooting_speed', label: 'Schot', icon: Trophy },
   ];
 
   if (isLoading) {
@@ -129,10 +129,43 @@ export default function LeaderboardPage() {
             <CardHeader className="pb-0">
               <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground px-4">
                 <div className="col-span-1">#</div>
-                <div className="col-span-5">Speler</div>
-                <div className="col-span-2 text-center">Trainingen</div>
-                <div className="col-span-2 text-center">Lat-raak</div>
-                <div className="col-span-2 text-center">Snelheid</div>
+                <div className="col-span-4">Speler</div>
+                <button 
+                  onClick={() => setSortBy('sessions_attended')}
+                  className={cn(
+                    'col-span-2 text-center cursor-pointer hover:text-foreground transition-colors',
+                    sortBy === 'sessions_attended' && 'text-primary font-bold'
+                  )}
+                >
+                  Trainingen
+                </button>
+                <button 
+                  onClick={() => setSortBy('crossbars_hit')}
+                  className={cn(
+                    'col-span-1 text-center cursor-pointer hover:text-foreground transition-colors',
+                    sortBy === 'crossbars_hit' && 'text-primary font-bold'
+                  )}
+                >
+                  Latjes
+                </button>
+                <button 
+                  onClick={() => setSortBy('shooting_speed')}
+                  className={cn(
+                    'col-span-2 text-center cursor-pointer hover:text-foreground transition-colors',
+                    sortBy === 'shooting_speed' && 'text-primary font-bold'
+                  )}
+                >
+                  Schotkracht
+                </button>
+                <button 
+                  onClick={() => setSortBy('running_speed')}
+                  className={cn(
+                    'col-span-2 text-center cursor-pointer hover:text-foreground transition-colors',
+                    sortBy === 'running_speed' && 'text-primary font-bold'
+                  )}
+                >
+                  Snelheid
+                </button>
               </div>
             </CardHeader>
             <CardContent className="divide-y divide-border">
@@ -162,7 +195,7 @@ export default function LeaderboardPage() {
                         </span>
                       )}
                     </div>
-                    <div className="col-span-5 flex items-center gap-3">
+                    <div className="col-span-4 flex items-center gap-3">
                       <AvatarDisplay avatarId={entry.avatar_id} size="sm" />
                       <div>
                         <span className="font-medium">{entry.first_name}</span>
@@ -180,16 +213,22 @@ export default function LeaderboardPage() {
                       {entry.sessions_attended}
                     </div>
                     <div className={cn(
-                      'col-span-2 text-center font-medium',
+                      'col-span-1 text-center font-medium',
                       sortBy === 'crossbars_hit' && 'text-primary'
                     )}>
                       {entry.crossbars_hit}
                     </div>
                     <div className={cn(
                       'col-span-2 text-center font-medium',
+                      sortBy === 'shooting_speed' && 'text-primary'
+                    )}>
+                      {entry.shooting_speed > 0 ? `${entry.shooting_speed}` : '-'}
+                    </div>
+                    <div className={cn(
+                      'col-span-2 text-center font-medium',
                       sortBy === 'running_speed' && 'text-primary'
                     )}>
-                      {entry.running_speed > 0 ? `${entry.running_speed} km/h` : '-'}
+                      {entry.running_speed > 0 ? `${entry.running_speed}` : '-'}
                     </div>
                   </div>
                 ))
