@@ -10,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Users, Settings2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Users, Settings2, Trash2 } from 'lucide-react';
 
 const ALL_ROLES = [
   { value: 'player', label: 'Speler' },
@@ -41,6 +42,7 @@ export default function AdminSpelersPage() {
   const queryClient = useQueryClient();
   const [editingPlayer, setEditingPlayer] = useState<PlayerWithRoles | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
+  const [deletePlayer, setDeletePlayer] = useState<PlayerWithRoles | null>(null);
 
   // Fetch all profiles with their roles
   const { data: players, isLoading: playersLoading } = useQuery({
@@ -117,6 +119,35 @@ export default function AdminSpelersPage() {
     },
   });
 
+  // Delete player mutation
+  const deletePlayerMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      // Delete from user_roles first
+      const { error: rolesError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (rolesError) throw rolesError;
+
+      // Delete from profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', userId);
+
+      if (profileError) throw profileError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-players'] });
+      toast({ title: 'Account verwijderd', description: 'Het account is succesvol verwijderd.' });
+      setDeletePlayer(null);
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
   const handleEditRoles = (player: PlayerWithRoles) => {
     setEditingPlayer(player);
     setSelectedRoles([...player.roles]);
@@ -140,6 +171,11 @@ export default function AdminSpelersPage() {
       userId: editingPlayer.user_id,
       newRoles: selectedRoles,
     });
+  };
+
+  const handleDeletePlayer = () => {
+    if (!deletePlayer) return;
+    deletePlayerMutation.mutate(deletePlayer.user_id);
   };
 
   const formatDate = (dateString: string | null) => {
@@ -245,54 +281,64 @@ export default function AdminSpelersPage() {
                         <TableCell>{formatDate(player.last_login_at)}</TableCell>
                         {isAdmin && (
                           <TableCell className="text-right">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleEditRoles(player)}
-                                >
-                                  <Settings2 className="w-4 h-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Rollen beheren voor {player.first_name}</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4 mt-4">
-                                  <p className="text-sm text-muted-foreground">
-                                    Selecteer de rollen die je wilt toewijzen aan deze gebruiker.
-                                  </p>
-                                  <div className="space-y-3">
-                                    {ALL_ROLES.map((role) => (
-                                      <div key={role.value} className="flex items-center space-x-3">
-                                        <Checkbox
-                                          id={`role-${role.value}`}
-                                          checked={selectedRoles.includes(role.value)}
-                                          onCheckedChange={() => handleRoleToggle(role.value)}
-                                        />
-                                        <Label
-                                          htmlFor={`role-${role.value}`}
-                                          className="text-sm font-medium cursor-pointer"
-                                        >
-                                          {role.label}
-                                        </Label>
-                                      </div>
-                                    ))}
-                                  </div>
+                            <div className="flex justify-end gap-1">
+                              <Dialog>
+                                <DialogTrigger asChild>
                                   <Button
-                                    onClick={handleSaveRoles}
-                                    className="w-full"
-                                    disabled={updateRolesMutation.isPending}
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleEditRoles(player)}
                                   >
-                                    {updateRolesMutation.isPending ? (
-                                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                    ) : null}
-                                    Opslaan
+                                    <Settings2 className="w-4 h-4" />
                                   </Button>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Rollen beheren voor {player.first_name}</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4 mt-4">
+                                    <p className="text-sm text-muted-foreground">
+                                      Selecteer de rollen die je wilt toewijzen aan deze gebruiker.
+                                    </p>
+                                    <div className="space-y-3">
+                                      {ALL_ROLES.map((role) => (
+                                        <div key={role.value} className="flex items-center space-x-3">
+                                          <Checkbox
+                                            id={`role-${role.value}`}
+                                            checked={selectedRoles.includes(role.value)}
+                                            onCheckedChange={() => handleRoleToggle(role.value)}
+                                          />
+                                          <Label
+                                            htmlFor={`role-${role.value}`}
+                                            className="text-sm font-medium cursor-pointer"
+                                          >
+                                            {role.label}
+                                          </Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <Button
+                                      onClick={handleSaveRoles}
+                                      className="w-full"
+                                      disabled={updateRolesMutation.isPending}
+                                    >
+                                      {updateRolesMutation.isPending ? (
+                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                      ) : null}
+                                      Opslaan
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => setDeletePlayer(player)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         )}
                       </TableRow>
@@ -307,6 +353,31 @@ export default function AdminSpelersPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletePlayer} onOpenChange={(open) => !open && setDeletePlayer(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Account verwijderen</AlertDialogTitle>
+              <AlertDialogDescription>
+                Weet je zeker dat je het account van <strong>{deletePlayer?.first_name}</strong> wilt verwijderen? 
+                Dit kan niet ongedaan worden gemaakt.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuleren</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeletePlayer}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deletePlayerMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Verwijderen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
