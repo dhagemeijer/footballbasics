@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Trophy, Pencil } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle } from 'lucide-react';
 
 interface PlayerStats {
   id: string;
@@ -218,7 +218,14 @@ export default function AdminStatsPage() {
                             {player.isPlayerOnly ? player.session_quota : '-'}
                           </TableCell>
                           <TableCell className="text-center font-medium">
-                            {trainingsRemaining !== null ? trainingsRemaining : '-'}
+                            {trainingsRemaining !== null ? (
+                              <span className={`inline-flex items-center gap-1 ${trainingsRemaining <= 0 ? 'text-destructive' : ''}`}>
+                                {trainingsRemaining}
+                                {trainingsRemaining <= 0 && (
+                                  <AlertCircle className="w-4 h-4" />
+                                )}
+                              </span>
+                            ) : '-'}
                           </TableCell>
                           <TableCell className="text-center font-medium">
                             {player.sessions_attended || 0}
