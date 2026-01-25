@@ -16,7 +16,8 @@ interface Suggestion {
   id: string;
   suggestion: string;
   created_at: string;
-  profiles: { first_name: string; avatar_id: number } | null;
+  user_id: string;
+  profile?: { first_name: string; avatar_id: number | null } | null;
 }
 
 export default function SuggestionsPage() {
@@ -32,11 +33,27 @@ export default function SuggestionsPage() {
   }, []);
 
   const fetchSuggestions = async () => {
-    const { data } = await supabase
+    const { data: suggestionsData } = await supabase
       .from('training_focus_suggestions')
-      .select('*, profiles(first_name, avatar_id)')
+      .select('*')
       .order('created_at', { ascending: false });
-    setSuggestions((data as Suggestion[]) || []);
+
+    if (suggestionsData && suggestionsData.length > 0) {
+      const userIds = [...new Set(suggestionsData.map(s => s.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, avatar_id')
+        .in('user_id', userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+      const enriched = suggestionsData.map(s => ({
+        ...s,
+        profile: profilesMap.get(s.user_id) || null
+      }));
+      setSuggestions(enriched);
+    } else {
+      setSuggestions([]);
+    }
     setIsLoading(false);
   };
 
@@ -87,9 +104,9 @@ export default function SuggestionsPage() {
             <Card key={s.id}>
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
-                  <AvatarDisplay avatarId={s.profiles?.avatar_id || 1} size="sm" />
+                  <AvatarDisplay avatarId={s.profile?.avatar_id || 1} size="sm" />
                   <div>
-                    <p className="font-medium">{s.profiles?.first_name || 'Speler'}</p>
+                    <p className="font-medium">{s.profile?.first_name || 'Speler'}</p>
                     <p className="text-muted-foreground text-sm">{format(new Date(s.created_at), 'd MMM yyyy', { locale: nl })}</p>
                     <p className="mt-2">{s.suggestion}</p>
                   </div>
