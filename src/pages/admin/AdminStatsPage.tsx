@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, Trophy, Pencil } from 'lucide-react';
@@ -24,6 +24,8 @@ interface PlayerStats {
   crossbars_hit: number;
   shooting_speed: number;
   running_speed: number;
+  session_quota: number;
+  isPlayerOnly: boolean;
 }
 
 export default function AdminStatsPage() {
@@ -38,19 +40,50 @@ export default function AdminStatsPage() {
     crossbars_hit: 0,
     shooting_speed: 0,
     running_speed: 0,
+    session_quota: 0,
   });
 
-  // Fetch all profiles
+  // Fetch all profiles with their roles
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch profiles
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, user_id, username, first_name, avatar_id, sessions_attended, crossbars_hit, shooting_speed, running_speed')
+        .select('id, user_id, username, first_name, avatar_id, sessions_attended, crossbars_hit, shooting_speed, running_speed, session_quota')
         .order('first_name', { ascending: true });
 
-      if (error) throw error;
-      return data as PlayerStats[];
+      if (profilesError) throw profilesError;
+
+      // Fetch all user roles
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Create a map of user_id to roles
+      const userRolesMap = new Map<string, string[]>();
+      rolesData?.forEach((r) => {
+        const existing = userRolesMap.get(r.user_id) || [];
+        existing.push(r.role);
+        userRolesMap.set(r.user_id, existing);
+      });
+
+      // Mark each profile as player-only or not
+      return profilesData.map((profile) => {
+        const roles = userRolesMap.get(profile.user_id) || [];
+        const hasAdminOrTrainer = roles.includes('admin') || roles.includes('trainer');
+        return {
+          ...profile,
+          sessions_attended: profile.sessions_attended || 0,
+          crossbars_hit: profile.crossbars_hit || 0,
+          shooting_speed: profile.shooting_speed || 0,
+          running_speed: profile.running_speed || 0,
+          session_quota: profile.session_quota || 0,
+          isPlayerOnly: !hasAdminOrTrainer,
+        } as PlayerStats;
+      });
     },
   });
 
@@ -82,6 +115,7 @@ export default function AdminStatsPage() {
       crossbars_hit: player.crossbars_hit || 0,
       shooting_speed: player.shooting_speed || 0,
       running_speed: player.running_speed || 0,
+      session_quota: player.session_quota || 0,
     });
     setIsDialogOpen(true);
   };
@@ -89,14 +123,21 @@ export default function AdminStatsPage() {
   const handleSaveStats = () => {
     if (!editingPlayer) return;
 
+    const stats: Partial<PlayerStats> = {
+      sessions_attended: formData.sessions_attended,
+      crossbars_hit: formData.crossbars_hit,
+      shooting_speed: formData.shooting_speed,
+      running_speed: formData.running_speed,
+    };
+
+    // Only include session_quota for players (not admins/trainers)
+    if (editingPlayer.isPlayerOnly) {
+      stats.session_quota = formData.session_quota;
+    }
+
     updateStatsMutation.mutate({
       id: editingPlayer.id,
-      stats: {
-        sessions_attended: formData.sessions_attended,
-        crossbars_hit: formData.crossbars_hit,
-        shooting_speed: formData.shooting_speed,
-        running_speed: formData.running_speed,
-      },
+      stats,
     });
   };
 
@@ -147,6 +188,8 @@ export default function AdminStatsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Speler</TableHead>
+                      <TableHead className="text-center">Strippenkaart</TableHead>
+                      <TableHead className="text-center">Trainingen over</TableHead>
                       <TableHead className="text-center">Trainingen</TableHead>
                       <TableHead className="text-center">Lat Geraakt</TableHead>
                       <TableHead className="text-center">Schot (km/u)</TableHead>
@@ -155,40 +198,52 @@ export default function AdminStatsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {players.map((player) => (
-                      <TableRow key={player.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
-                            <div>
-                              <p className="font-medium">{player.first_name}</p>
-                              <p className="text-xs text-muted-foreground">{player.username}</p>
+                    {players.map((player) => {
+                      const trainingsRemaining = player.isPlayerOnly 
+                        ? Math.max(0, player.session_quota - player.sessions_attended)
+                        : null;
+                      
+                      return (
+                        <TableRow key={player.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
+                              <div>
+                                <p className="font-medium">{player.first_name}</p>
+                                <p className="text-xs text-muted-foreground">{player.username}</p>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center font-medium">
-                          {player.sessions_attended || 0}
-                        </TableCell>
-                        <TableCell className="text-center font-medium">
-                          {player.crossbars_hit || 0}
-                        </TableCell>
-                        <TableCell className="text-center font-medium">
-                          {player.shooting_speed || 0}
-                        </TableCell>
-                        <TableCell className="text-center font-medium">
-                          {player.running_speed || 0}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditPlayer(player)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {player.isPlayerOnly ? player.session_quota : '-'}
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {trainingsRemaining !== null ? trainingsRemaining : '-'}
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {player.sessions_attended || 0}
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {player.crossbars_hit || 0}
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {player.shooting_speed || 0}
+                          </TableCell>
+                          <TableCell className="text-center font-medium">
+                            {player.running_speed || 0}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditPlayer(player)}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -212,6 +267,21 @@ export default function AdminStatsPage() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
+                {editingPlayer?.isPlayerOnly && (
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="quota">Strippenkaart (tegoed)</Label>
+                    <Input
+                      id="quota"
+                      type="number"
+                      min="0"
+                      value={formData.session_quota}
+                      onChange={(e) => setFormData({ ...formData, session_quota: parseInt(e.target.value) || 0 })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Trainingen over: {Math.max(0, formData.session_quota - formData.sessions_attended)}
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="sessions">Aantal Trainingen</Label>
                   <Input
