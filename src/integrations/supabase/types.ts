@@ -169,22 +169,39 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          read_at: string | null
+          session_id: string | null
+          status: string | null
           suggestion: string
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          read_at?: string | null
+          session_id?: string | null
+          status?: string | null
           suggestion: string
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          read_at?: string | null
+          session_id?: string | null
+          status?: string | null
           suggestion?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "training_focus_suggestions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_sessions: {
         Row: {

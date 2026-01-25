@@ -8,12 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { AvatarSelector } from '@/components/AvatarSelector';
+import { AdminSuggestionsSection } from '@/components/admin/AdminSuggestionsSection';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Eye, EyeOff, Trophy, Target, Zap } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function ProfilePage() {
-  const { user, profile, refreshProfile, isLoading: authLoading } = useAuth();
+  const { user, profile, isTrainerOrAdmin, refreshProfile, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
@@ -167,6 +168,9 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Admin Suggestions Section */}
+          {isTrainerOrAdmin && <AdminSuggestionsSection />}
 
           {/* Edit Profile */}
           <Card>
