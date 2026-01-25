@@ -50,9 +50,9 @@ export default function LeaderboardPage() {
 
     const rolesMap = new Map<string, string>();
     (roles || []).forEach(r => {
-      // Prioritize admin > trainer > player
+      // Prioritize trainer > admin > player (show Trainer instead of Admin when both)
       const current = rolesMap.get(r.user_id);
-      if (!current || (r.role === 'admin') || (r.role === 'trainer' && current === 'player')) {
+      if (!current || (r.role === 'trainer') || (r.role === 'admin' && current === 'player')) {
         rolesMap.set(r.user_id, r.role);
       }
     });
