@@ -189,6 +189,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          location: string | null
           max_participants: number | null
           session_date: string
           session_time: string
@@ -199,6 +200,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          location?: string | null
           max_participants?: number | null
           session_date: string
           session_time: string
@@ -209,6 +211,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          location?: string | null
           max_participants?: number | null
           session_date?: string
           session_time?: string
