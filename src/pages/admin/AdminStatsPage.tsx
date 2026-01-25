@@ -200,7 +200,7 @@ export default function AdminStatsPage() {
                   <TableBody>
                     {players.map((player) => {
                       const trainingsRemaining = player.isPlayerOnly 
-                        ? Math.max(0, player.session_quota - player.sessions_attended)
+                        ? player.session_quota - player.sessions_attended
                         : null;
                       
                       return (
@@ -285,7 +285,7 @@ export default function AdminStatsPage() {
                       onChange={(e) => setFormData({ ...formData, session_quota: parseInt(e.target.value) || 0 })}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Trainingen over: {Math.max(0, formData.session_quota - formData.sessions_attended)}
+                      Trainingen over: {formData.session_quota - formData.sessions_attended}
                     </p>
                   </div>
                 )}
