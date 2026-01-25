@@ -183,77 +183,119 @@ export default function AdminStatsPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : players && players.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Speler</TableHead>
-                      <TableHead className="text-center">Strippenkaart</TableHead>
-                      <TableHead className="text-center">Trainingen over</TableHead>
-                      <TableHead className="text-center">Trainingen</TableHead>
-                      <TableHead className="text-center">Lat Geraakt</TableHead>
-                      <TableHead className="text-center">Schot (km/u)</TableHead>
-                      <TableHead className="text-center">Sprint (km/u)</TableHead>
-                      <TableHead className="text-right">Bewerken</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {players.map((player) => {
-                      const trainingsRemaining = player.isPlayerOnly 
-                        ? player.session_quota - player.sessions_attended
-                        : null;
-                      
-                      return (
-                        <TableRow key={player.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
-                              <div>
-                                <p className="font-medium">{player.first_name}</p>
-                                <p className="text-xs text-muted-foreground">{player.username}</p>
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Speler</TableHead>
+                        <TableHead className="text-center">Strippenkaart</TableHead>
+                        <TableHead className="text-center">Trainingen over</TableHead>
+                        <TableHead className="text-center">Trainingen</TableHead>
+                        <TableHead className="text-center">Lat Geraakt</TableHead>
+                        <TableHead className="text-center">Schot (km/u)</TableHead>
+                        <TableHead className="text-center">Sprint (km/u)</TableHead>
+                        <TableHead className="text-right">Bewerken</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {players.map((player) => {
+                        const trainingsRemaining = player.isPlayerOnly 
+                          ? player.session_quota - player.sessions_attended
+                          : null;
+                        
+                        return (
+                          <TableRow key={player.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
+                                <div>
+                                  <p className="font-medium">{player.first_name}</p>
+                                  <p className="text-xs text-muted-foreground">{player.username}</p>
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center font-medium">
-                            {player.isPlayerOnly ? player.session_quota : '-'}
-                          </TableCell>
-                          <TableCell className="text-center font-medium">
-                            {trainingsRemaining !== null ? (
-                              <span className={`inline-flex items-center gap-1 ${trainingsRemaining <= 0 ? 'text-destructive' : ''}`}>
-                                {trainingsRemaining}
-                                {trainingsRemaining <= 0 && (
-                                  <AlertCircle className="w-4 h-4" />
-                                )}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {player.isPlayerOnly ? player.session_quota : '-'}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {trainingsRemaining !== null ? (
+                                <span className={`inline-flex items-center gap-1 ${trainingsRemaining <= 0 ? 'text-destructive' : ''}`}>
+                                  {trainingsRemaining}
+                                  {trainingsRemaining <= 0 && (
+                                    <AlertCircle className="w-4 h-4" />
+                                  )}
+                                </span>
+                              ) : '-'}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {player.sessions_attended || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {player.crossbars_hit || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {player.shooting_speed || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {player.running_speed || 0}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditPlayer(player)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden space-y-3">
+                  {players.map((player) => {
+                    const trainingsRemaining = player.isPlayerOnly 
+                      ? player.session_quota - player.sessions_attended
+                      : null;
+                    
+                    return (
+                      <div 
+                        key={player.id} 
+                        className="flex items-center gap-3 p-3 border border-border rounded-lg"
+                      >
+                        <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
+                        
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{player.first_name}</p>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
+                            <span>🏃 {player.sessions_attended}</span>
+                            <span>🥅 {player.crossbars_hit}</span>
+                            {player.isPlayerOnly && trainingsRemaining !== null && (
+                              <span className={trainingsRemaining <= 0 ? 'text-destructive' : ''}>
+                                📋 {trainingsRemaining} over
                               </span>
-                            ) : '-'}
-                          </TableCell>
-                          <TableCell className="text-center font-medium">
-                            {player.sessions_attended || 0}
-                          </TableCell>
-                          <TableCell className="text-center font-medium">
-                            {player.crossbars_hit || 0}
-                          </TableCell>
-                          <TableCell className="text-center font-medium">
-                            {player.shooting_speed || 0}
-                          </TableCell>
-                          <TableCell className="text-center font-medium">
-                            {player.running_speed || 0}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditPlayer(player)}
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditPlayer(player)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             ) : (
               <p className="text-center text-muted-foreground py-8">
                 Nog geen spelers geregistreerd.
