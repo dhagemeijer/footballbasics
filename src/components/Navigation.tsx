@@ -16,7 +16,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { useState } from 'react';
-import logoImage from '@/assets/logo.jpg';
+import logoImage from '@/assets/logo.png';
 
 export function Navigation() {
   const { user, profile, isTrainerOrAdmin, signOut } = useAuth();
