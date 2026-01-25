@@ -108,7 +108,7 @@ export default function HomePage() {
             <img 
               src={fbTextLogo} 
               alt="Football Basics - more skills, more fun" 
-              className="h-24 md:h-32 mx-auto mb-8 animate-fade-in"
+              className="w-full max-w-md md:max-w-lg lg:max-w-xl mx-auto mb-8 animate-fade-in"
             />
             
             <p className="text-lg md:text-xl text-white mb-8 animate-slide-in-up stagger-1">
