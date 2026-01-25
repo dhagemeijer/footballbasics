@@ -22,9 +22,10 @@ import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
 const LOCATIONS = [
-  { value: 'Forum Sport', label: 'Forum Sport' },
-  { value: 'woensdag veld 1', label: 'Woensdag veld 1' },
-  { value: 'zondag veld 2', label: 'Zondag veld 2' },
+  { value: 'Forum Sport - veld 1', label: 'Forum Sport - veld 1' },
+  { value: 'Forum Sport - veld 2', label: 'Forum Sport - veld 2' },
+  { value: 'Forum Sport - veld 3', label: 'Forum Sport - veld 3' },
+  { value: 'Forum Sport - veld 4', label: 'Forum Sport - veld 4' },
 ];
 
 const DEFAULT_FOCUS = 'Balcontrole & traptechniek';
@@ -40,7 +41,7 @@ export default function AdminTrainingsPage() {
   // Form state
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState('19:00');
-  const [selectedLocation, setSelectedLocation] = useState('Forum Sport');
+  const [selectedLocation, setSelectedLocation] = useState('Forum Sport - veld 1');
   const [focus, setFocus] = useState(DEFAULT_FOCUS);
 
   // Fetch training sessions
