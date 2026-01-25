@@ -52,6 +52,7 @@ export type Database = {
           first_name: string
           id: string
           is_admin: boolean | null
+          last_login_at: string | null
           running_speed: number | null
           session_quota: number | null
           sessions_attended: number | null
@@ -66,6 +67,7 @@ export type Database = {
           first_name: string
           id?: string
           is_admin?: boolean | null
+          last_login_at?: string | null
           running_speed?: number | null
           session_quota?: number | null
           sessions_attended?: number | null
@@ -80,6 +82,7 @@ export type Database = {
           first_name?: string
           id?: string
           is_admin?: boolean | null
+          last_login_at?: string | null
           running_speed?: number | null
           session_quota?: number | null
           sessions_attended?: number | null

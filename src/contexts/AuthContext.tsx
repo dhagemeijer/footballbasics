@@ -107,10 +107,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Create email from username for Supabase auth
     const email = `${username.toLowerCase()}@footballbasics.app`;
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    // Update last_login_at on successful login
+    if (!error && data.user) {
+      await supabase
+        .from('profiles')
+        .update({ last_login_at: new Date().toISOString() })
+        .eq('user_id', data.user.id);
+    }
 
     return { error: error ? new Error(error.message) : null };
   };
