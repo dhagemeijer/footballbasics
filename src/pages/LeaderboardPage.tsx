@@ -4,7 +4,9 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Trophy, Zap, Target, Medal } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Loader2, Trophy, Zap, Target, Medal, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LeaderboardEntry {
@@ -24,6 +26,8 @@ export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortField>('sessions_attended');
+  const [showTrainers, setShowTrainers] = useState(true);
+  const [showPlayers, setShowPlayers] = useState(true);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -72,7 +76,14 @@ export default function LeaderboardPage() {
     setIsLoading(false);
   };
 
-  const sortedEntries = [...entries].sort((a, b) => b[sortBy] - a[sortBy]);
+  // Filter entries based on role selection
+  const filteredEntries = entries.filter(entry => {
+    const isTrainer = entry.role === 'trainer' || entry.role === 'admin';
+    if (isTrainer) return showTrainers;
+    return showPlayers;
+  });
+
+  const sortedEntries = [...filteredEntries].sort((a, b) => b[sortBy] - a[sortBy]);
 
   const sortButtons: { field: SortField; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { field: 'sessions_attended', label: 'Trainingen', icon: Medal },
@@ -106,7 +117,7 @@ export default function LeaderboardPage() {
           </div>
 
           {/* Sort Buttons */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
             {sortButtons.map(({ field, label, icon: Icon }) => (
               <button
                 key={field}
@@ -122,6 +133,34 @@ export default function LeaderboardPage() {
                 {label}
               </button>
             ))}
+          </div>
+
+          {/* Filter Options */}
+          <div className="flex justify-center gap-6 mb-8">
+            <div className="flex items-center gap-2 bg-card rounded-lg px-4 py-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground mr-2">Toon:</span>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="show-trainers"
+                  checked={showTrainers}
+                  onCheckedChange={(checked) => setShowTrainers(checked === true)}
+                />
+                <Label htmlFor="show-trainers" className="text-sm cursor-pointer">
+                  Trainers
+                </Label>
+              </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Checkbox
+                  id="show-players"
+                  checked={showPlayers}
+                  onCheckedChange={(checked) => setShowPlayers(checked === true)}
+                />
+                <Label htmlFor="show-players" className="text-sm cursor-pointer">
+                  Spelers
+                </Label>
+              </div>
+            </div>
           </div>
 
           {/* Leaderboard */}
