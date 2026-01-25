@@ -5,6 +5,7 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
+import { UpcomingTrainings } from '@/components/UpcomingTrainings';
 import { supabase } from '@/integrations/supabase/client';
 import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 import logo from '@/assets/logo.png';
@@ -186,6 +187,9 @@ export default function HomePage() {
           />
         </div>
       </section>
+
+      {/* Upcoming Trainings Section */}
+      <UpcomingTrainings />
 
       {/* Stats Section */}
       <section className="bg-black py-16">
