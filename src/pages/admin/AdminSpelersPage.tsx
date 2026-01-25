@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
@@ -8,11 +9,38 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
-import { Loader2, ArrowLeft, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, ArrowLeft, Users, Settings2 } from 'lucide-react';
+
+const ALL_ROLES = [
+  { value: 'player', label: 'Speler' },
+  { value: 'trainer', label: 'Trainer' },
+  { value: 'admin', label: 'Admin' },
+] as const;
+
+type AppRole = 'player' | 'trainer' | 'admin';
+
+interface PlayerWithRoles {
+  id: string;
+  user_id: string;
+  username: string;
+  first_name: string;
+  avatar_id: number | null;
+  created_at: string | null;
+  last_login_at: string | null;
+  roles: AppRole[];
+}
 
 export default function AdminSpelersPage() {
-  const { isTrainerOrAdmin, isLoading: authLoading } = useAuth();
+  const { isTrainerOrAdmin, isAdmin, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editingPlayer, setEditingPlayer] = useState<PlayerWithRoles | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
 
   // Fetch all profiles with their roles
   const { data: players, isLoading: playersLoading } = useQuery({
@@ -35,12 +63,84 @@ export default function AdminSpelersPage() {
       // Map roles to profiles
       return profiles.map((profile) => ({
         ...profile,
+        last_login_at: (profile as any).last_login_at,
         roles: roles
           .filter((r) => r.user_id === profile.user_id)
-          .map((r) => r.role),
-      }));
+          .map((r) => r.role as AppRole),
+      })) as PlayerWithRoles[];
     },
   });
+
+  // Update roles mutation
+  const updateRolesMutation = useMutation({
+    mutationFn: async ({ userId, newRoles }: { userId: string; newRoles: AppRole[] }) => {
+      // Get current roles
+      const { data: currentRoles, error: fetchError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      if (fetchError) throw fetchError;
+
+      const currentRoleValues = currentRoles?.map((r) => r.role as AppRole) || [];
+
+      // Roles to add
+      const rolesToAdd = newRoles.filter((r) => !currentRoleValues.includes(r));
+      // Roles to remove
+      const rolesToRemove = currentRoleValues.filter((r) => !newRoles.includes(r));
+
+      // Add new roles
+      if (rolesToAdd.length > 0) {
+        const { error: insertError } = await supabase.from('user_roles').insert(
+          rolesToAdd.map((role) => ({ user_id: userId, role }))
+        );
+        if (insertError) throw insertError;
+      }
+
+      // Remove roles
+      for (const role of rolesToRemove) {
+        const { error: deleteError } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId)
+          .eq('role', role);
+        if (deleteError) throw deleteError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-players'] });
+      toast({ title: 'Rollen bijgewerkt', description: 'De rollen zijn succesvol aangepast.' });
+      setEditingPlayer(null);
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleEditRoles = (player: PlayerWithRoles) => {
+    setEditingPlayer(player);
+    setSelectedRoles([...player.roles]);
+  };
+
+  const handleRoleToggle = (role: AppRole) => {
+    setSelectedRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+    );
+  };
+
+  const handleSaveRoles = () => {
+    if (!editingPlayer) return;
+    
+    if (selectedRoles.length === 0) {
+      toast({ title: 'Fout', description: 'Een speler moet minimaal één rol hebben.', variant: 'destructive' });
+      return;
+    }
+
+    updateRolesMutation.mutate({
+      userId: editingPlayer.user_id,
+      newRoles: selectedRoles,
+    });
+  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
@@ -54,6 +154,15 @@ export default function AdminSpelersPage() {
       player: 'bg-green-100 text-green-800',
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      admin: 'Admin',
+      trainer: 'Trainer',
+      player: 'Speler',
+    };
+    return labels[role] || role;
   };
 
   if (authLoading) {
@@ -107,6 +216,7 @@ export default function AdminSpelersPage() {
                       <TableHead>Rol(len)</TableHead>
                       <TableHead>Aangemeld op</TableHead>
                       <TableHead>Laatst ingelogd</TableHead>
+                      {isAdmin && <TableHead className="text-right">Acties</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -121,18 +231,70 @@ export default function AdminSpelersPage() {
                         <TableCell>{player.username}</TableCell>
                         <TableCell>
                           <div className="flex gap-1 flex-wrap">
-                            {player.roles.map((role: string) => (
+                            {player.roles.map((role) => (
                               <span
                                 key={role}
                                 className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadge(role)}`}
                               >
-                                {role}
+                                {getRoleLabel(role)}
                               </span>
                             ))}
                           </div>
                         </TableCell>
                         <TableCell>{formatDate(player.created_at)}</TableCell>
-                        <TableCell>{formatDate((player as any).last_login_at)}</TableCell>
+                        <TableCell>{formatDate(player.last_login_at)}</TableCell>
+                        {isAdmin && (
+                          <TableCell className="text-right">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEditRoles(player)}
+                                >
+                                  <Settings2 className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Rollen beheren voor {player.first_name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 mt-4">
+                                  <p className="text-sm text-muted-foreground">
+                                    Selecteer de rollen die je wilt toewijzen aan deze gebruiker.
+                                  </p>
+                                  <div className="space-y-3">
+                                    {ALL_ROLES.map((role) => (
+                                      <div key={role.value} className="flex items-center space-x-3">
+                                        <Checkbox
+                                          id={`role-${role.value}`}
+                                          checked={selectedRoles.includes(role.value)}
+                                          onCheckedChange={() => handleRoleToggle(role.value)}
+                                        />
+                                        <Label
+                                          htmlFor={`role-${role.value}`}
+                                          className="text-sm font-medium cursor-pointer"
+                                        >
+                                          {role.label}
+                                        </Label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <Button
+                                    onClick={handleSaveRoles}
+                                    className="w-full"
+                                    disabled={updateRolesMutation.isPending}
+                                  >
+                                    {updateRolesMutation.isPending ? (
+                                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    ) : null}
+                                    Opslaan
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
