@@ -15,6 +15,7 @@ import AdminPage from "./pages/AdminPage";
 import AdminTrainingsPage from "./pages/admin/AdminTrainingsPage";
 import AdminSpelersPage from "./pages/admin/AdminSpelersPage";
 import AdminStatsPage from "./pages/admin/AdminStatsPage";
+import AdminAttendancePage from "./pages/admin/AdminAttendancePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/admin/trainingen" element={<AdminTrainingsPage />} />
             <Route path="/admin/spelers" element={<AdminSpelersPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
+            <Route path="/admin/aanwezigheid/:sessionId" element={<AdminAttendancePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
