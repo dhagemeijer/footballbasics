@@ -49,7 +49,7 @@ export function Navigation() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
+                  'relative flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
                   isActive(item.to)
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
@@ -57,9 +57,11 @@ export function Navigation() {
               >
                 <item.icon className="w-4 h-4" />
                 <span className="font-medium">{item.label}</span>
+                {item.to === '/admin' && <NotificationBadge />}
               </Link>
             ))}
           </div>
+
 
           {/* User Section */}
           <div className="hidden md:flex items-center gap-4">
