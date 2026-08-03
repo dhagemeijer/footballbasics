@@ -90,9 +90,10 @@ export default function AdminStatsPage() {
   // Update stats mutation
   const updateStatsMutation = useMutation({
     mutationFn: async ({ id, stats }: { id: string; stats: Partial<PlayerStats> }) => {
+      const { isPlayerOnly, ...dbStats } = stats;
       const { error } = await supabase
         .from('profiles')
-        .update(stats)
+        .update(dbStats)
         .eq('id', id);
 
       if (error) throw error;
