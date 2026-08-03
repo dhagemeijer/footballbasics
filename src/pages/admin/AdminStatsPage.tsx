@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle, Plus } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle } from 'lucide-react';
 import { StatStepper } from '@/components/admin/StatStepper';
 
 
