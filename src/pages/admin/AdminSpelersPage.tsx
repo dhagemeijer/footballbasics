@@ -85,7 +85,7 @@ export default function AdminSpelersPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-players'] });
       toast({ title: 'Speler aangemaakt', description: 'De speler kan nu inloggen.' });
       setIsCreateOpen(false);
-      setNewPlayer({ first_name: '', username: '', password: '', avatar_id: 1, session_quota: 10 });
+      setNewPlayer({ first_name: '', username: '', password: '', avatar_id: 1, package: 'woensdag_10' });
     },
     onError: (error: Error) => {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
