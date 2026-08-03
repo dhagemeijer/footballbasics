@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO, isAfter, isBefore } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Calendar, Clock, Users, Check, X, Loader2 } from 'lucide-react';
+import { Calendar, Clock, Users, Check, X, Loader2, Lightbulb } from 'lucide-react';
 import { PostSignupSuggestionDialog } from '@/components/PostSignupSuggestionDialog';
 
 interface TrainingSession {
@@ -32,6 +32,15 @@ export default function TrainingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [signingUp, setSigningUp] = useState<string | null>(null);
   const [suggestFor, setSuggestFor] = useState<{ id: string; title: string } | null>(null);
+  const [editSuggestion, setEditSuggestion] = useState<{
+    sessionId: string;
+    title: string;
+    suggestionId: string | null;
+    text: string;
+  } | null>(null);
+  const [mySuggestions, setMySuggestions] = useState<
+    Record<string, { id: string; suggestion: string }>
+  >({});
 
   const fetchSessions = async () => {
 
@@ -69,6 +78,17 @@ export default function TrainingPage() {
         .select('session_id')
         .eq('user_id', user.id);
       mySignups = (data || []).map((r) => r.session_id);
+
+      const { data: sugg } = await supabase
+        .from('training_focus_suggestions')
+        .select('id, suggestion, session_id')
+        .eq('user_id', user.id)
+        .not('session_id', 'is', null);
+      const map: Record<string, { id: string; suggestion: string }> = {};
+      (sugg || []).forEach((s) => {
+        if (s.session_id) map[s.session_id] = { id: s.id, suggestion: s.suggestion };
+      });
+      setMySuggestions(map);
     }
 
     setSessions(
@@ -210,6 +230,15 @@ export default function TrainingPage() {
                     onCancelSignup={handleCancelSignup}
                     signingUp={signingUp}
                     isLoggedIn={!!user}
+                    suggestion={mySuggestions[session.id]}
+                    onSuggest={() =>
+                      setEditSuggestion({
+                        sessionId: session.id,
+                        title: session.title,
+                        suggestionId: mySuggestions[session.id]?.id ?? null,
+                        text: mySuggestions[session.id]?.suggestion ?? '',
+                      })
+                    }
                   />
                 ))}
               </div>
@@ -246,6 +275,16 @@ export default function TrainingPage() {
         onOpenChange={(open) => !open && setSuggestFor(null)}
         sessionId={suggestFor?.id ?? null}
         sessionTitle={suggestFor?.title}
+        onSaved={fetchSessions}
+      />
+      <PostSignupSuggestionDialog
+        open={!!editSuggestion}
+        onOpenChange={(open) => !open && setEditSuggestion(null)}
+        sessionId={editSuggestion?.sessionId ?? null}
+        sessionTitle={editSuggestion?.title}
+        suggestionId={editSuggestion?.suggestionId}
+        initialText={editSuggestion?.text}
+        onSaved={fetchSessions}
       />
     </Layout>
   );
@@ -258,6 +297,8 @@ function SessionCard({
   onCancelSignup,
   signingUp,
   isLoggedIn,
+  suggestion,
+  onSuggest,
 }: {
   session: TrainingSession;
   isPast: boolean;
@@ -265,6 +306,8 @@ function SessionCard({
   onCancelSignup: (id: string) => void;
   signingUp: string | null;
   isLoggedIn: boolean;
+  suggestion?: { id: string; suggestion: string };
+  onSuggest?: () => void;
 }) {
   const spotsLeft = session.max_participants - (session.signup_count || 0);
   const isFull = spotsLeft <= 0;
@@ -315,7 +358,13 @@ function SessionCard({
           )}
 
           {!isPast && isLoggedIn && (
-            <div>
+            <div className="flex items-center gap-2">
+              {session.user_signed_up && onSuggest && (
+                <Button variant="outline" size="sm" onClick={onSuggest}>
+                  <Lightbulb className="w-4 h-4 mr-1" />
+                  {suggestion ? 'Suggestie bewerken' : 'Suggestie geven'}
+                </Button>
+              )}
               {session.user_signed_up ? (
                 <Button
                   variant="outline"
