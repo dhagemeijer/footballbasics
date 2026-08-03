@@ -143,7 +143,14 @@ export default function AdminStatsPage() {
     },
   });
 
-  // Quick +/- adjustment mutation
+  type NumericStatField =
+    | 'sessions_attended'
+    | 'crossbars_hit'
+    | 'shooting_speed'
+    | 'running_speed'
+    | 'session_quota';
+
+
 
   const [pendingId, setPendingId] = useState<string | null>(null);
   const adjustStatMutation = useMutation({
