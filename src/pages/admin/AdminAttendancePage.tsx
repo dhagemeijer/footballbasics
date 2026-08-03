@@ -126,7 +126,12 @@ export default function AdminAttendancePage() {
       const { error } = await supabase
         .from('session_signups')
         .insert({ session_id: sessionId!, user_id: userId });
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('Deze speler is al ingeschreven voor deze training.');
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-session-signups', sessionId] });
