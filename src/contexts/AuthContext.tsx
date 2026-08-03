@@ -163,8 +163,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRoles([]);
   };
 
-  const isTrainerOrAdmin = roles.some(r => r.role === 'trainer' || r.role === 'admin') || (profile?.is_admin ?? false);
-  const isAdmin = roles.some(r => r.role === 'admin') || (profile?.is_admin ?? false);
+  // Role checks rely solely on the user_roles table (server-enforced), never profiles.is_admin
+  const isTrainerOrAdmin = roles.some(r => r.role === 'trainer' || r.role === 'admin');
+  const isAdmin = roles.some(r => r.role === 'admin');
 
   return (
     <AuthContext.Provider value={{
