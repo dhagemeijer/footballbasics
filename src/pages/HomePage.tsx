@@ -73,14 +73,22 @@ export default function HomePage() {
       });
     }
 
-    // Fetch total training sessions
-    const { count: trainingCount } = await supabase
+    // Fetch training sessions and count only those that have already started
+    const { data: sessions } = await supabase
       .from('training_sessions')
-      .select('*', { count: 'exact', head: true });
+      .select('session_date, session_time');
+
+    const now = new Date();
+    const startedTrainings = (sessions || []).filter((s) => {
+      if (!s.session_date) return false;
+      const time = (s.session_time || '00:00:00').slice(0, 8).padEnd(8, ':00');
+      const start = new Date(`${s.session_date}T${time}`);
+      return !isNaN(start.getTime()) && start <= now;
+    }).length;
 
     setStats({
       totalPlayerSessions,
-      totalTrainings: trainingCount || 0,
+      totalTrainings: startedTrainings,
       totalCrossbars,
     });
   };
