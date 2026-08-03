@@ -19,11 +19,20 @@ interface SignupWithProfile {
   id: string;
   user_id: string;
   attended: boolean;
+  crossbars_hit: number | null;
+  shooting_speed: number | null;
+  running_speed: number | null;
   profile: {
     first_name: string;
     username: string;
     avatar_id: number | null;
   };
+}
+
+interface StatsDraft {
+  crossbars_hit: string;
+  shooting_speed: string;
+  running_speed: string;
 }
 
 interface ProfileForAdd {
