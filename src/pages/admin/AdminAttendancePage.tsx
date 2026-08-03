@@ -19,11 +19,20 @@ interface SignupWithProfile {
   id: string;
   user_id: string;
   attended: boolean;
+  crossbars_hit: number | null;
+  shooting_speed: number | null;
+  running_speed: number | null;
   profile: {
     first_name: string;
     username: string;
     avatar_id: number | null;
   };
+}
+
+interface StatsDraft {
+  crossbars_hit: string;
+  shooting_speed: string;
+  running_speed: string;
 }
 
 interface ProfileForAdd {
@@ -42,6 +51,7 @@ export default function AdminAttendancePage() {
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statsDrafts, setStatsDrafts] = useState<Record<string, StatsDraft>>({});
 
   // Fetch session details
   const { data: session, isLoading: sessionLoading } = useQuery({
@@ -64,7 +74,7 @@ export default function AdminAttendancePage() {
     queryFn: async () => {
       const { data: signupsData, error } = await supabase
         .from('session_signups')
-        .select('id, user_id, attended')
+        .select('id, user_id, attended, crossbars_hit, shooting_speed, running_speed')
         .eq('session_id', sessionId!);
       if (error) throw error;
 
@@ -114,6 +124,39 @@ export default function AdminAttendancePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-session-signups', sessionId] });
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Save per-session stats
+  const saveStatsMutation = useMutation({
+    mutationFn: async ({ signupId, draft }: { signupId: string; draft: StatsDraft }) => {
+      const toNum = (v: string) => {
+        const t = v.trim();
+        if (t === '') return null;
+        const n = Number(t.replace(',', '.'));
+        if (!Number.isFinite(n) || n < 0) throw new Error('Voer een geldig positief getal in.');
+        return n;
+      };
+      const payload = {
+        crossbars_hit: toNum(draft.crossbars_hit) ?? 0,
+        shooting_speed: toNum(draft.shooting_speed),
+        running_speed: toNum(draft.running_speed),
+      };
+      const { error } = await supabase.from('session_signups').update(payload).eq('id', signupId);
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      setStatsDrafts((prev) => {
+        const next = { ...prev };
+        delete next[vars.signupId];
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-session-signups', sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-players'] });
+      toast({ title: 'Opgeslagen', description: 'Statistieken zijn bijgewerkt.' });
     },
     onError: (error) => {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
@@ -218,30 +261,106 @@ export default function AdminAttendancePage() {
                 </div>
               ) : signups && signups.length > 0 ? (
                 <div className="space-y-2">
-                  {signups.map((signup) => (
-                    <div
-                      key={signup.id}
-                      className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <Checkbox
-                        checked={signup.attended}
-                        onCheckedChange={(checked) =>
-                          toggleAttendanceMutation.mutate({
-                            signupId: signup.id,
-                            attended: checked as boolean,
-                          })
-                        }
-                      />
-                      <AvatarDisplay avatarId={signup.profile.avatar_id || 1} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{signup.profile.first_name}</p>
-                        <p className="text-xs text-muted-foreground">{signup.profile.username}</p>
+                  {signups.map((signup) => {
+                    const draft = statsDrafts[signup.id] ?? {
+                      crossbars_hit: signup.crossbars_hit?.toString() ?? '',
+                      shooting_speed: signup.shooting_speed?.toString() ?? '',
+                      running_speed: signup.running_speed?.toString() ?? '',
+                    };
+                    const isDirty = !!statsDrafts[signup.id];
+                    const setField = (field: keyof StatsDraft, value: string) =>
+                      setStatsDrafts((prev) => ({ ...prev, [signup.id]: { ...draft, [field]: value } }));
+
+                    return (
+                      <div
+                        key={signup.id}
+                        className="p-3 border border-border rounded-lg space-y-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            checked={signup.attended}
+                            onCheckedChange={(checked) =>
+                              toggleAttendanceMutation.mutate({
+                                signupId: signup.id,
+                                attended: checked as boolean,
+                              })
+                            }
+                          />
+                          <AvatarDisplay avatarId={signup.profile.avatar_id || 1} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{signup.profile.first_name}</p>
+                            <p className="text-xs text-muted-foreground">{signup.profile.username}</p>
+                          </div>
+                          {signup.attended && (
+                            <span className="text-xs text-primary font-medium">Aanwezig</span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-xs text-muted-foreground">Latjes</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              inputMode="numeric"
+                              value={draft.crossbars_hit}
+                              onChange={(e) => setField('crossbars_hit', e.target.value)}
+                              className="h-9"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Schotkracht</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.1"
+                              inputMode="decimal"
+                              value={draft.shooting_speed}
+                              onChange={(e) => setField('shooting_speed', e.target.value)}
+                              className="h-9"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Snelheid</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.1"
+                              inputMode="decimal"
+                              value={draft.running_speed}
+                              onChange={(e) => setField('running_speed', e.target.value)}
+                              className="h-9"
+                            />
+                          </div>
+                        </div>
+
+                        {isDirty && (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setStatsDrafts((prev) => {
+                                  const next = { ...prev };
+                                  delete next[signup.id];
+                                  return next;
+                                })
+                              }
+                            >
+                              Annuleren
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={saveStatsMutation.isPending}
+                              onClick={() => saveStatsMutation.mutate({ signupId: signup.id, draft })}
+                            >
+                              Opslaan
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      {signup.attended && (
-                        <span className="text-xs text-primary font-medium">Aanwezig</span>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
