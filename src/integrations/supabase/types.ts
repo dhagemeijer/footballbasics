@@ -21,7 +21,9 @@ export type Database = {
           is_broadcast: boolean | null
           message: string
           read_at: string | null
+          related_id: string | null
           title: string
+          type: string | null
           user_id: string | null
         }
         Insert: {
@@ -30,7 +32,9 @@ export type Database = {
           is_broadcast?: boolean | null
           message: string
           read_at?: string | null
+          related_id?: string | null
           title: string
+          type?: string | null
           user_id?: string | null
         }
         Update: {
@@ -39,7 +43,9 @@ export type Database = {
           is_broadcast?: boolean | null
           message?: string
           read_at?: string | null
+          related_id?: string | null
           title?: string
+          type?: string | null
           user_id?: string | null
         }
         Relationships: []
