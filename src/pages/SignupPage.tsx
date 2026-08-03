@@ -89,9 +89,9 @@ export default function SignupPage() {
               alt="Football Basics - more skills, more fun"
               className="w-full max-w-[240px] mx-auto mb-4"
             />
-            <CardTitle className="text-2xl">
-              {step === 'info' ? 'Word lid van de academie!' : 'Kies je avatar!'}
-            </CardTitle>
+            {step === 'avatar' && (
+              <CardTitle className="text-2xl">Kies je avatar!</CardTitle>
+            )}
             <CardDescription>
               {step === 'info' 
                 ? 'Vul je gegevens in om je aan te melden.'
