@@ -262,7 +262,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_player_signup_counts: {
+        Args: never
+        Returns: {
+          player_count: number
+          session_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "player" | "trainer" | "admin"

@@ -53,34 +53,31 @@ export default function TrainingPage() {
       return;
     }
 
-    // Get signup counts for each session
-    const sessionsWithCounts = await Promise.all(
-      (sessionsData || []).map(async (session) => {
-        const { count } = await supabase
-          .from('session_signups')
-          .select('*', { count: 'exact', head: true })
-          .eq('session_id', session.id);
-
-        let userSignedUp = false;
-        if (user) {
-          const { data: signup } = await supabase
-            .from('session_signups')
-            .select('id')
-            .eq('session_id', session.id)
-            .eq('user_id', user.id)
-            .maybeSingle();
-          userSignedUp = !!signup;
-        }
-
-        return {
-          ...session,
-          signup_count: count || 0,
-          user_signed_up: userSignedUp,
-        };
-      })
+    // Player-only signup counts (trainers/admins do not count towards "X/max spelers")
+    const { data: counts } = await supabase.rpc('get_player_signup_counts');
+    const countMap = new Map<string, number>(
+      (counts || []).map((c: { session_id: string; player_count: number }) => [
+        c.session_id,
+        Number(c.player_count),
+      ])
     );
 
-    setSessions(sessionsWithCounts);
+    let mySignups: string[] = [];
+    if (user) {
+      const { data } = await supabase
+        .from('session_signups')
+        .select('session_id')
+        .eq('user_id', user.id);
+      mySignups = (data || []).map((r) => r.session_id);
+    }
+
+    setSessions(
+      (sessionsData || []).map((session) => ({
+        ...session,
+        signup_count: countMap.get(session.id) || 0,
+        user_signed_up: mySignups.includes(session.id),
+      }))
+    );
     setIsLoading(false);
   };
 
