@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,13 +18,29 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   sessionId: string | null;
   sessionTitle?: string;
+  /** When set, the dialog edits this existing suggestion instead of creating a new one */
+  suggestionId?: string | null;
+  initialText?: string;
+  onSaved?: () => void;
 }
 
-export function PostSignupSuggestionDialog({ open, onOpenChange, sessionId, sessionTitle }: Props) {
+export function PostSignupSuggestionDialog({
+  open,
+  onOpenChange,
+  sessionId,
+  sessionTitle,
+  suggestionId,
+  initialText,
+  onSaved,
+}: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [text, setText] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) setText(initialText || '');
+  }, [open, initialText]);
 
   const close = () => {
     setText('');
@@ -34,11 +50,16 @@ export function PostSignupSuggestionDialog({ open, onOpenChange, sessionId, sess
   const handleSubmit = async () => {
     if (!user || !sessionId || !text.trim()) return;
     setIsSaving(true);
-    const { error } = await supabase.from('training_focus_suggestions').insert({
-      user_id: user.id,
-      session_id: sessionId,
-      suggestion: text.trim(),
-    });
+    const { error } = suggestionId
+      ? await supabase
+          .from('training_focus_suggestions')
+          .update({ suggestion: text.trim() })
+          .eq('id', suggestionId)
+      : await supabase.from('training_focus_suggestions').insert({
+          user_id: user.id,
+          session_id: sessionId,
+          suggestion: text.trim(),
+        });
     setIsSaving(false);
 
     if (error) {
@@ -50,7 +71,11 @@ export function PostSignupSuggestionDialog({ open, onOpenChange, sessionId, sess
       return;
     }
 
-    toast({ title: 'Bedankt! 💡', description: 'Je suggestie is verstuurd.' });
+    toast({
+      title: 'Bedankt! 💡',
+      description: suggestionId ? 'Je suggestie is bijgewerkt.' : 'Je suggestie is verstuurd.',
+    });
+    onSaved?.();
     close();
   };
 

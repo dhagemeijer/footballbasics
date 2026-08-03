@@ -13,7 +13,6 @@ import {
   LogOut,
   Menu,
   X,
-  Lightbulb,
 } from 'lucide-react';
 import { useState } from 'react';
 import logoImage from '@/assets/logo.png';
@@ -27,7 +26,7 @@ export function Navigation() {
     { to: '/', icon: Home, label: 'Home', show: true },
     { to: '/trainingen', icon: Calendar, label: 'Trainingen', show: !!user },
     { to: '/ranglijst', icon: Trophy, label: 'Ranglijst', show: !!user },
-    { to: '/suggesties', icon: Lightbulb, label: 'Suggesties', show: !!user },
+    
     { to: '/profiel', icon: User, label: 'Profiel', show: !!user },
     { to: '/admin', icon: Settings, label: 'Beheer', show: isTrainerOrAdmin },
   ];
