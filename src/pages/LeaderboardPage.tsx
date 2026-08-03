@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
@@ -26,7 +27,7 @@ interface LeaderboardEntry {
 type SortField = 'sessions_attended' | 'crossbars_hit' | 'running_speed' | 'shooting_speed';
 
 export default function LeaderboardPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortField>('sessions_attended');
@@ -107,6 +108,10 @@ export default function LeaderboardPage() {
     { field: 'shooting_speed', label: 'Schotkracht', icon: Trophy },
     { field: 'running_speed', label: 'Snelheid', icon: Zap },
   ];
+
+  if (!authLoading && !user) {
+    return <Navigate to="/inloggen" replace />;
+  }
 
   if (isLoading) {
     return (
