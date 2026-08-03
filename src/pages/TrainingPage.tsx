@@ -79,6 +79,18 @@ export default function TrainingPage() {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+    if (user) fetchSessions();
+    else setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  if (!authLoading && !user) {
+    return <Navigate to="/inloggen" replace />;
+  }
+
+
+
   const handleSignup = async (sessionId: string) => {
     if (!user) {
       toast({
