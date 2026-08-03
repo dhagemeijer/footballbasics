@@ -73,7 +73,7 @@ export default function AdminAttendancePage() {
     queryFn: async () => {
       const { data: signupsData, error } = await supabase
         .from('session_signups')
-        .select('id, user_id, attended')
+        .select('id, user_id, attended, crossbars_hit, shooting_speed, running_speed')
         .eq('session_id', sessionId!);
       if (error) throw error;
 
