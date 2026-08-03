@@ -27,6 +27,18 @@ const ALL_ROLES = [
 
 type AppRole = 'player' | 'trainer' | 'admin';
 
+const PACKAGE_OPTIONS = [
+  { value: 'woensdag_los', label: 'Woensdag losse training', quota: 2 },
+  { value: 'zondag_los', label: 'Zondag losse training', quota: 2 },
+  { value: 'woensdag_5', label: 'Woensdag 5 strippen', quota: 6 },
+  { value: 'zondag_5', label: 'Zondag 5 strippen', quota: 6 },
+  { value: 'woensdag_10', label: 'Woensdag 10 strippen', quota: 11 },
+  { value: 'zondag_10', label: 'Zondag 10 strippen', quota: 11 },
+  { value: 'trainer', label: 'Trainer (geen strippen)', quota: 0 },
+] as const;
+
+type PackageKey = (typeof PACKAGE_OPTIONS)[number]['value'];
+
 interface PlayerWithRoles {
   id: string;
   user_id: string;
