@@ -192,6 +192,15 @@ export function UpcomingTrainings() {
                       </span>
                     </div>
 
+                    {!user && (
+                      <Button size="sm" asChild>
+                        <Link to="/inloggen">
+                          <Check className="w-4 h-4 mr-1" />
+                          Inschrijven
+                        </Link>
+                      </Button>
+                    )}
+
                     {user && (
                       <div>
                         {session.user_signed_up ? (

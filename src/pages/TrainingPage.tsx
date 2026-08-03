@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
@@ -285,6 +286,15 @@ function SessionCard({
             </span>
           </div>
           
+          {!isPast && !isLoggedIn && (
+            <Button size="sm" asChild>
+              <Link to="/inloggen">
+                <Check className="w-4 h-4 mr-1" />
+                Inschrijven
+              </Link>
+            </Button>
+          )}
+
           {!isPast && isLoggedIn && (
             <div>
               {session.user_signed_up ? (
