@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, LogIn } from 'lucide-react';
 import { Layout } from '@/components/Layout';
+import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -56,7 +57,11 @@ export default function LoginPage() {
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
         <Card className="w-full max-w-md animate-scale-in">
           <CardHeader className="text-center">
-            <div className="text-6xl mb-4">⚽</div>
+            <img
+              src={fbTextLogo}
+              alt="Football Basics - more skills, more fun"
+              className="w-full max-w-[240px] mx-auto mb-4"
+            />
             <CardTitle className="text-2xl">Inloggen</CardTitle>
             <CardDescription>
               Welkom terug bij Football Basics!
