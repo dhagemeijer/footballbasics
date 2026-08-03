@@ -105,6 +105,8 @@ export function UpcomingTrainings() {
         title: 'Ingeschreven! 🎉',
         description: 'Je bent succesvol ingeschreven voor deze training.',
       });
+      const s = sessions.find((x) => x.id === sessionId);
+      setSuggestFor({ id: sessionId, title: s?.title || '' });
       await fetchUpcomingSessions();
     }
     setSigningUp(null);
