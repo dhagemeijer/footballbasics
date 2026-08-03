@@ -261,30 +261,106 @@ export default function AdminAttendancePage() {
                 </div>
               ) : signups && signups.length > 0 ? (
                 <div className="space-y-2">
-                  {signups.map((signup) => (
-                    <div
-                      key={signup.id}
-                      className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <Checkbox
-                        checked={signup.attended}
-                        onCheckedChange={(checked) =>
-                          toggleAttendanceMutation.mutate({
-                            signupId: signup.id,
-                            attended: checked as boolean,
-                          })
-                        }
-                      />
-                      <AvatarDisplay avatarId={signup.profile.avatar_id || 1} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{signup.profile.first_name}</p>
-                        <p className="text-xs text-muted-foreground">{signup.profile.username}</p>
+                  {signups.map((signup) => {
+                    const draft = statsDrafts[signup.id] ?? {
+                      crossbars_hit: signup.crossbars_hit?.toString() ?? '',
+                      shooting_speed: signup.shooting_speed?.toString() ?? '',
+                      running_speed: signup.running_speed?.toString() ?? '',
+                    };
+                    const isDirty = !!statsDrafts[signup.id];
+                    const setField = (field: keyof StatsDraft, value: string) =>
+                      setStatsDrafts((prev) => ({ ...prev, [signup.id]: { ...draft, [field]: value } }));
+
+                    return (
+                      <div
+                        key={signup.id}
+                        className="p-3 border border-border rounded-lg space-y-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            checked={signup.attended}
+                            onCheckedChange={(checked) =>
+                              toggleAttendanceMutation.mutate({
+                                signupId: signup.id,
+                                attended: checked as boolean,
+                              })
+                            }
+                          />
+                          <AvatarDisplay avatarId={signup.profile.avatar_id || 1} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{signup.profile.first_name}</p>
+                            <p className="text-xs text-muted-foreground">{signup.profile.username}</p>
+                          </div>
+                          {signup.attended && (
+                            <span className="text-xs text-primary font-medium">Aanwezig</span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-xs text-muted-foreground">Latjes</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              inputMode="numeric"
+                              value={draft.crossbars_hit}
+                              onChange={(e) => setField('crossbars_hit', e.target.value)}
+                              className="h-9"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Schotkracht</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.1"
+                              inputMode="decimal"
+                              value={draft.shooting_speed}
+                              onChange={(e) => setField('shooting_speed', e.target.value)}
+                              className="h-9"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Snelheid</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.1"
+                              inputMode="decimal"
+                              value={draft.running_speed}
+                              onChange={(e) => setField('running_speed', e.target.value)}
+                              className="h-9"
+                            />
+                          </div>
+                        </div>
+
+                        {isDirty && (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setStatsDrafts((prev) => {
+                                  const next = { ...prev };
+                                  delete next[signup.id];
+                                  return next;
+                                })
+                              }
+                            >
+                              Annuleren
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={saveStatsMutation.isPending}
+                              onClick={() => saveStatsMutation.mutate({ signupId: signup.id, draft })}
+                            >
+                              Opslaan
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      {signup.attended && (
-                        <span className="text-xs text-primary font-medium">Aanwezig</span>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
