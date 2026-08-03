@@ -51,7 +51,7 @@ export default function AdminSpelersPage() {
     username: '',
     password: '',
     avatar_id: 1,
-    session_quota: 10,
+    package: 'woensdag_10' as PackageKey,
   });
 
   const createPlayerMutation = useMutation({
