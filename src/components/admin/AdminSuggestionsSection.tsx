@@ -99,9 +99,19 @@ export function AdminSuggestionsSection() {
                           <Badge variant="destructive" className="text-xs">Afgekeurd</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {suggestion.suggestion}
-                      </p>
+                      {suggestion.options.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {suggestion.options.map((opt) => (
+                            <Badge key={opt} variant="outline" className="text-xs">
+                              {opt}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {suggestion.suggestion}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(suggestion.created_at), 'd MMM', { locale: nl })}
                         {suggestion.session && ` • ${suggestion.session.title}`}
