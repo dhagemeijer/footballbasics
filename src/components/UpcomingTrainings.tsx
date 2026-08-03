@@ -260,6 +260,13 @@ export function UpcomingTrainings() {
           </Button>
         </div>
       </div>
+
+      <PostSignupSuggestionDialog
+        open={!!suggestFor}
+        onOpenChange={(open) => !open && setSuggestFor(null)}
+        sessionId={suggestFor?.id ?? null}
+        sessionTitle={suggestFor?.title}
+      />
     </section>
   );
 }
