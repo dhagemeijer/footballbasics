@@ -372,30 +372,71 @@ export default function AdminStatsPage() {
                     return (
                       <div 
                         key={player.id} 
-                        className="flex items-center gap-3 p-3 border border-border rounded-lg"
+                        className="p-3 border border-border rounded-lg space-y-3"
                       >
-                        <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
-                        
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{player.first_name}</p>
-                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
-                            <span>🏃 {player.sessions_attended}</span>
-                            <span>🥅 {player.crossbars_hit}</span>
+                        <div className="flex items-center gap-3">
+                          <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{player.first_name}</p>
                             {player.isPlayerOnly && trainingsRemaining !== null && (
-                              <span className={trainingsRemaining <= 0 ? 'text-destructive' : ''}>
-                                📋 {trainingsRemaining} over
-                              </span>
+                              <p className={`text-xs mt-0.5 ${trainingsRemaining <= 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                📋 {trainingsRemaining} trainingen over
+                              </p>
                             )}
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditPlayer(player)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
                         </div>
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditPlayer(player)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
+                        <div className="space-y-2">
+                          {player.isPlayerOnly && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Strippenkaart</span>
+                              <StatStepper
+                                value={player.session_quota}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'session_quota', v)}
+                              />
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Trainingen</span>
+                            <StatStepper
+                              value={player.sessions_attended || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'sessions_attended', v)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Lat geraakt</span>
+                            <StatStepper
+                              value={player.crossbars_hit || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'crossbars_hit', v)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Schot (km/u)</span>
+                            <StatStepper
+                              value={player.shooting_speed || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'shooting_speed', v)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Sprint (km/u)</span>
+                            <StatStepper
+                              value={player.running_speed || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'running_speed', v)}
+                            />
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
