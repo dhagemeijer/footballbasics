@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
@@ -25,7 +25,7 @@ interface TrainingSession {
 }
 
 export default function TrainingPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +34,10 @@ export default function TrainingPage() {
   useEffect(() => {
     fetchSessions();
   }, [user]);
+
+  if (!authLoading && !user) {
+    return <Navigate to="/inloggen" replace />;
+  }
 
   const fetchSessions = async () => {
     setIsLoading(true);
