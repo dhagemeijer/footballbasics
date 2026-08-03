@@ -172,28 +172,31 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          options: string[]
           read_at: string | null
           session_id: string | null
           status: string | null
-          suggestion: string
+          suggestion: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          options?: string[]
           read_at?: string | null
           session_id?: string | null
           status?: string | null
-          suggestion: string
+          suggestion?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          options?: string[]
           read_at?: string | null
           session_id?: string | null
           status?: string | null
-          suggestion?: string
+          suggestion?: string | null
           user_id?: string
         }
         Relationships: [
@@ -273,6 +276,13 @@ export type Database = {
         Returns: {
           player_count: number
           session_id: string
+        }[]
+      }
+      get_session_option_votes: {
+        Args: { _session_id: string }
+        Returns: {
+          option: string
+          votes: number
         }[]
       }
     }
