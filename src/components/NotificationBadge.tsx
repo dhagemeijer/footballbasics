@@ -1,9 +1,9 @@
-import { useSuggestions } from '@/hooks/useSuggestions';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function NotificationBadge() {
   const { isTrainerOrAdmin } = useAuth();
-  const { unreadCount } = useSuggestions();
+  const { unreadCount } = useNotifications();
 
   if (!isTrainerOrAdmin || unreadCount === 0) {
     return null;

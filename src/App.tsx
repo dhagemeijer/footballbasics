@@ -16,6 +16,7 @@ import AdminTrainingsPage from "./pages/admin/AdminTrainingsPage";
 import AdminSpelersPage from "./pages/admin/AdminSpelersPage";
 import AdminStatsPage from "./pages/admin/AdminStatsPage";
 import AdminAttendancePage from "./pages/admin/AdminAttendancePage";
+import AdminMeldingenPage from "./pages/admin/AdminMeldingenPage";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
 
