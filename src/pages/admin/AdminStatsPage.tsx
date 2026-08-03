@@ -157,6 +157,44 @@ export default function AdminStatsPage() {
     adjustStatMutation.mutate({ id, field, value });
   };
 
+  const [speedDrafts, setSpeedDrafts] = useState<Record<string, string>>({});
+
+  const renderSpeedInput = (
+    player: PlayerStats,
+    field: 'shooting_speed' | 'running_speed',
+  ) => {
+    const key = `${player.id}:${field}`;
+    const value = speedDrafts[key] ?? String(player[field] ?? 0);
+    return (
+      <Input
+        type="text"
+        inputMode="decimal"
+        className="h-9 w-24 mx-auto text-center"
+        disabled={pendingId === player.id}
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value.replace(',', '.');
+          if (v === '' || /^\d*\.?\d*$/.test(v)) {
+            setSpeedDrafts((prev) => ({ ...prev, [key]: v }));
+          }
+        }}
+        onBlur={() => {
+          const raw = speedDrafts[key];
+          if (raw === undefined) return;
+          const num = Number(raw);
+          setSpeedDrafts((prev) => {
+            const next = { ...prev };
+            delete next[key];
+            return next;
+          });
+          if (!Number.isFinite(num) || num === (player[field] ?? 0)) return;
+          adjustStat(player.id, field, num);
+        }}
+      />
+    );
+  };
+
+
 
 
   const handleEditPlayer = (player: PlayerStats) => {
@@ -246,7 +284,7 @@ export default function AdminStatsPage() {
                         <TableHead className="text-center">Trainingen</TableHead>
                         <TableHead className="text-center">Lat Geraakt</TableHead>
                         <TableHead className="text-center">Schot (km/u)</TableHead>
-                        <TableHead className="text-center">Sprint (km/u)</TableHead>
+                        <TableHead className="text-center">Snelheid (km/u)</TableHead>
                         <TableHead className="text-right">Bewerken</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -301,18 +339,10 @@ export default function AdminStatsPage() {
                               />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              <StatStepper
-                                value={player.shooting_speed || 0}
-                                disabled={pendingId === player.id}
-                                onChange={(v) => adjustStat(player.id, 'shooting_speed', v)}
-                              />
+                              {renderSpeedInput(player, 'shooting_speed')}
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              <StatStepper
-                                value={player.running_speed || 0}
-                                disabled={pendingId === player.id}
-                                onChange={(v) => adjustStat(player.id, 'running_speed', v)}
-                              />
+                              {renderSpeedInput(player, 'running_speed')}
                             </TableCell>
                             <TableCell className="text-right">
                               <Button
@@ -390,19 +420,11 @@ export default function AdminStatsPage() {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm">Schot (km/u)</span>
-                            <StatStepper
-                              value={player.shooting_speed || 0}
-                              disabled={pendingId === player.id}
-                              onChange={(v) => adjustStat(player.id, 'shooting_speed', v)}
-                            />
+                            {renderSpeedInput(player, 'shooting_speed')}
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm">Sprint (km/u)</span>
-                            <StatStepper
-                              value={player.running_speed || 0}
-                              disabled={pendingId === player.id}
-                              onChange={(v) => adjustStat(player.id, 'running_speed', v)}
-                            />
+                            <span className="text-sm">Snelheid (km/u)</span>
+                            {renderSpeedInput(player, 'running_speed')}
                           </div>
                         </div>
                       </div>
@@ -477,7 +499,7 @@ export default function AdminStatsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="running">Sprint Snelheid (km/u)</Label>
+                  <Label htmlFor="running">Snelheid (km/u)</Label>
                   <Input
                     id="running"
                     type="number"
