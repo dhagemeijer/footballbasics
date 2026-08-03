@@ -593,6 +593,8 @@ export default function AdminSpelersPage() {
                   </TableBody>
                 </Table>
               </div>
+              </>
+
             ) : (
               <p className="text-center text-muted-foreground py-8">
                 Nog geen spelers geregistreerd.
