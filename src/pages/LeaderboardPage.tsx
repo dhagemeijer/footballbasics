@@ -299,13 +299,13 @@ export default function LeaderboardPage() {
                         </div>
                         <div className={cn(
                           'col-span-2 text-center font-medium',
-                          sortBy === 'sessions_attended' && 'text-primary'
+                          sortBy === 'sessions_attended' && (isCurrentUser ? 'text-accent-foreground' : 'text-primary')
                         )}>
                           {entry.sessions_attended}
                         </div>
                         <div className={cn(
                           'col-span-1 text-center',
-                          sortBy === 'crossbars_hit' && 'text-primary'
+                          sortBy === 'crossbars_hit' && (isCurrentUser ? 'text-accent-foreground' : 'text-primary')
                         )}>
                           <div className="font-medium">{entry.crossbars_hit}</div>
                           {entry.sessions_attended > 0 && (
@@ -316,13 +316,13 @@ export default function LeaderboardPage() {
                         </div>
                         <div className={cn(
                           'col-span-2 text-center font-medium',
-                          sortBy === 'shooting_speed' && 'text-primary'
+                          sortBy === 'shooting_speed' && (isCurrentUser ? 'text-accent-foreground' : 'text-primary')
                         )}>
                           {entry.shooting_speed > 0 ? `${entry.shooting_speed}` : '-'}
                         </div>
                         <div className={cn(
                           'col-span-2 text-center font-medium',
-                          sortBy === 'running_speed' && 'text-primary'
+                          sortBy === 'running_speed' && (isCurrentUser ? 'text-accent-foreground' : 'text-primary')
                         )}>
                           {entry.running_speed > 0 ? `${entry.running_speed}` : '-'}
                         </div>
@@ -371,7 +371,10 @@ export default function LeaderboardPage() {
 
                         {/* Current Sort Value - Highlighted */}
                         <div className="flex-shrink-0 text-right">
-                          <div className="text-lg font-bold text-primary">
+                          <div className={cn(
+                            'text-lg font-bold',
+                            isCurrentUser ? 'text-accent-foreground' : 'text-primary'
+                          )}>
                             {sortBy === 'sessions_attended' && entry.sessions_attended}
                             {sortBy === 'crossbars_hit' && entry.crossbars_hit}
                             {sortBy === 'shooting_speed' && (entry.shooting_speed > 0 ? entry.shooting_speed : '-')}
