@@ -144,6 +144,7 @@ export default function AdminStatsPage() {
   });
 
   // Quick +/- adjustment mutation
+
   const [pendingId, setPendingId] = useState<string | null>(null);
   const adjustStatMutation = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: NumericStatField; value: number }) => {
