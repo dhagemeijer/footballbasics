@@ -10,7 +10,7 @@ import SignupPage from "./pages/SignupPage";
 import TrainingPage from "./pages/TrainingPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import ProfilePage from "./pages/ProfilePage";
-import SuggestionsPage from "./pages/SuggestionsPage";
+
 import AdminPage from "./pages/AdminPage";
 import AdminTrainingsPage from "./pages/admin/AdminTrainingsPage";
 import AdminSpelersPage from "./pages/admin/AdminSpelersPage";
@@ -36,7 +36,7 @@ const App = () => (
             <Route path="/trainingen" element={<TrainingPage />} />
             <Route path="/ranglijst" element={<LeaderboardPage />} />
             <Route path="/profiel" element={<ProfilePage />} />
-            <Route path="/suggesties" element={<SuggestionsPage />} />
+            
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/trainingen" element={<AdminTrainingsPage />} />
             <Route path="/admin/spelers" element={<AdminSpelersPage />} />

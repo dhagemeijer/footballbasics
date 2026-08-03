@@ -187,9 +187,9 @@ export default function HomePage() {
           <FeatureCard
             icon={Target}
             title="Suggesties"
-            description="Geef aan waar je op zou willen trainen."
+            description="Schrijf je in voor een training en geef aan waar je op wilt trainen."
             delay="stagger-3"
-            linkTo="/suggesties"
+            linkTo="/trainingen"
             linkText="Geef suggestie"
           />
         </div>
