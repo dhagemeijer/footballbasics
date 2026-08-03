@@ -45,6 +45,53 @@ export default function AdminSpelersPage() {
   const [editingPlayer, setEditingPlayer] = useState<PlayerWithRoles | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
   const [deletePlayer, setDeletePlayer] = useState<PlayerWithRoles | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newPlayer, setNewPlayer] = useState({
+    first_name: '',
+    username: '',
+    password: '',
+    avatar_id: 1,
+    session_quota: 10,
+  });
+
+  const createPlayerMutation = useMutation({
+    mutationFn: async (payload: typeof newPlayer) => {
+      const { data, error } = await supabase.functions.invoke('create-player', {
+        body: payload,
+      });
+      if (error) {
+        const message = (data as { error?: string } | null)?.error;
+        throw new Error(message || error.message);
+      }
+      if ((data as { error?: string } | null)?.error) {
+        throw new Error((data as { error: string }).error);
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-players'] });
+      toast({ title: 'Speler aangemaakt', description: 'De speler kan nu inloggen.' });
+      setIsCreateOpen(false);
+      setNewPlayer({ first_name: '', username: '', password: '', avatar_id: 1, session_quota: 10 });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleCreatePlayer = () => {
+    if (!newPlayer.first_name.trim() || !newPlayer.username.trim() || newPlayer.password.length < 6) {
+      toast({
+        title: 'Fout',
+        description: 'Vul een naam, gebruikersnaam en wachtwoord (min. 6 tekens) in.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    createPlayerMutation.mutate(newPlayer);
+  };
+
+
 
   // Fetch all profiles with their roles
   const { data: players, isLoading: playersLoading } = useQuery({
