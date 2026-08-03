@@ -9,16 +9,15 @@ import { UpcomingTrainings } from '@/components/UpcomingTrainings';
 import { supabase } from '@/integrations/supabase/client';
 import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 import logo from '@/assets/logo.png';
-import goalIcon from '@/assets/goal-icon.png';
-import playerIcon from '@/assets/player-icon.png';
-import footballIcon from '@/assets/football-icon.png';
 import { 
   Calendar, 
   Trophy, 
   Zap, 
   Target,
   ArrowRight,
-  Medal
+  Medal,
+  Users,
+  CalendarCheck
 } from 'lucide-react';
 
 interface HomeStats {
@@ -195,9 +194,9 @@ export default function HomePage() {
       <section className="bg-black py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-3 gap-6 text-center max-w-2xl mx-auto">
-            <StatCard icon={<img src={playerIcon} alt="Spelers" className="h-10 w-10 mx-auto" />} value={stats.totalPlayerSessions.toString()} label="Spelers" />
-            <StatCard icon={<img src={footballIcon} alt="Trainingen" className="h-10 w-10 mx-auto" />} value={stats.totalTrainings.toString()} label="Trainingen" />
-            <StatCard icon={<img src={goalIcon} alt="Latjes" className="h-10 w-10 mx-auto" />} value={stats.totalCrossbars.toString()} label="Latjes" />
+            <StatCard icon={<Users className="h-10 w-10 mx-auto text-primary" aria-label="Spelers" />} value={stats.totalPlayerSessions.toString()} label="Spelers" />
+            <StatCard icon={<CalendarCheck className="h-10 w-10 mx-auto text-primary" aria-label="Trainingen" />} value={stats.totalTrainings.toString()} label="Trainingen" />
+            <StatCard icon={<Target className="h-10 w-10 mx-auto text-primary" aria-label="Latjes" />} value={stats.totalCrossbars.toString()} label="Latjes" />
           </div>
         </div>
       </section>
