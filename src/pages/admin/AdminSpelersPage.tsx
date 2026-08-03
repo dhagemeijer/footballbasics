@@ -330,14 +330,27 @@ export default function AdminSpelersPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-quota">Strippenkaart (aantal trainingen)</Label>
-                <Input
-                  id="new-quota"
-                  type="number"
-                  min="0"
-                  value={newPlayer.session_quota}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, session_quota: parseInt(e.target.value) || 0 })}
-                />
+                <Label htmlFor="new-package">Type / Strippenkaart</Label>
+                <Select
+                  value={newPlayer.package}
+                  onValueChange={(v) => setNewPlayer({ ...newPlayer, package: v as PackageKey })}
+                >
+                  <SelectTrigger id="new-package">
+                    <SelectValue placeholder="Kies een optie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PACKAGE_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {newPlayer.package !== 'trainer' && (
+                  <p className="text-xs text-muted-foreground">
+                    Inclusief 1 gratis proeftraining: {PACKAGE_OPTIONS.find((o) => o.value === newPlayer.package)?.quota} trainingen.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Kies een avatar</Label>
