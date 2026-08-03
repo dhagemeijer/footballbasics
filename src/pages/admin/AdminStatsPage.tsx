@@ -143,6 +143,32 @@ export default function AdminStatsPage() {
     },
   });
 
+  // Quick +/- adjustment mutation
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const adjustStatMutation = useMutation({
+    mutationFn: async ({ id, field, value }: { id: string; field: keyof PlayerStats; value: number }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ [field]: value })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onMutate: ({ id }) => setPendingId(id),
+    onSettled: () => setPendingId(null),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const adjustStat = (id: string, field: keyof PlayerStats, value: number) => {
+    adjustStatMutation.mutate({ id, field, value });
+  };
+
+
+
   const handleEditPlayer = (player: PlayerStats) => {
     setEditingPlayer(player);
     setFormData({
