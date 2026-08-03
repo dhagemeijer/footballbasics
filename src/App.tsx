@@ -16,6 +16,7 @@ import AdminTrainingsPage from "./pages/admin/AdminTrainingsPage";
 import AdminSpelersPage from "./pages/admin/AdminSpelersPage";
 import AdminStatsPage from "./pages/admin/AdminStatsPage";
 import AdminAttendancePage from "./pages/admin/AdminAttendancePage";
+import AdminMeldingenPage from "./pages/admin/AdminMeldingenPage";
 import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/admin/trainingen" element={<AdminTrainingsPage />} />
             <Route path="/admin/spelers" element={<AdminSpelersPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
+            <Route path="/admin/meldingen" element={<AdminMeldingenPage />} />
             <Route path="/admin/aanwezigheid/:sessionId" element={<AdminAttendancePage />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="*" element={<NotFound />} />

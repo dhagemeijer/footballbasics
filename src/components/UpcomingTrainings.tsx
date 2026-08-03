@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { Calendar, Clock, Users, ArrowRight, Loader2, Check, X } from 'lucide-react';
+import { PostSignupSuggestionDialog } from '@/components/PostSignupSuggestionDialog';
 
 interface UpcomingSession {
   id: string;
@@ -27,6 +28,7 @@ export function UpcomingTrainings() {
   const [sessions, setSessions] = useState<UpcomingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [signingUp, setSigningUp] = useState<string | null>(null);
+  const [suggestFor, setSuggestFor] = useState<{ id: string; title: string } | null>(null);
 
   const fetchUpcomingSessions = useCallback(async () => {
     const now = new Date();
@@ -103,6 +105,8 @@ export function UpcomingTrainings() {
         title: 'Ingeschreven! 🎉',
         description: 'Je bent succesvol ingeschreven voor deze training.',
       });
+      const s = sessions.find((x) => x.id === sessionId);
+      setSuggestFor({ id: sessionId, title: s?.title || '' });
       await fetchUpcomingSessions();
     }
     setSigningUp(null);
@@ -256,6 +260,13 @@ export function UpcomingTrainings() {
           </Button>
         </div>
       </div>
+
+      <PostSignupSuggestionDialog
+        open={!!suggestFor}
+        onOpenChange={(open) => !open && setSuggestFor(null)}
+        sessionId={suggestFor?.id ?? null}
+        sessionTitle={suggestFor?.title}
+      />
     </section>
   );
 }

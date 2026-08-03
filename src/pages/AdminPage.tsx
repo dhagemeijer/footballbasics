@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, Calendar, Trophy, Settings } from 'lucide-react';
+import { Loader2, Users, Calendar, Trophy, Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AdminPage() {
@@ -26,6 +26,7 @@ export default function AdminPage() {
     { icon: Calendar, title: 'Trainingen beheren', description: 'Maak en bewerk trainingen', to: '/admin/trainingen' },
     { icon: Users, title: 'Spelers beheren', description: 'Bekijk en bewerk spelers', to: '/admin/spelers' },
     { icon: Trophy, title: 'Statistieken invoeren', description: 'Voer aanwezigheid en stats in', to: '/admin/stats' },
+    { icon: Bell, title: 'Meldingen', description: 'Nieuwe spelers, inschrijvingen en suggesties', to: '/admin/meldingen' },
   ];
 
   return (
@@ -37,7 +38,7 @@ export default function AdminPage() {
           <p className="text-muted-foreground">Beheer trainingen, spelers en statistieken</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {adminCards.map((card) => (
             <Link key={card.to} to={card.to}>
               <Card className="hover-lift h-full">
