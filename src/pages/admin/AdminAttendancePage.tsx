@@ -129,6 +129,39 @@ export default function AdminAttendancePage() {
     },
   });
 
+  // Save per-session stats
+  const saveStatsMutation = useMutation({
+    mutationFn: async ({ signupId, draft }: { signupId: string; draft: StatsDraft }) => {
+      const toNum = (v: string) => {
+        const t = v.trim();
+        if (t === '') return null;
+        const n = Number(t.replace(',', '.'));
+        if (!Number.isFinite(n) || n < 0) throw new Error('Voer een geldig positief getal in.');
+        return n;
+      };
+      const payload = {
+        crossbars_hit: toNum(draft.crossbars_hit) ?? 0,
+        shooting_speed: toNum(draft.shooting_speed),
+        running_speed: toNum(draft.running_speed),
+      };
+      const { error } = await supabase.from('session_signups').update(payload).eq('id', signupId);
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      setStatsDrafts((prev) => {
+        const next = { ...prev };
+        delete next[vars.signupId];
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-session-signups', sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-players'] });
+      toast({ title: 'Opgeslagen', description: 'Statistieken zijn bijgewerkt.' });
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
   // Add player to session
   const addPlayerMutation = useMutation({
     mutationFn: async (userId: string) => {
