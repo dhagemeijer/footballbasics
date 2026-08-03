@@ -12,41 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle, Plus, Minus } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle } from 'lucide-react';
+import { StatStepper } from '@/components/admin/StatStepper';
 
-interface StatStepperProps {
-  value: number;
-  onChange: (newValue: number) => void;
-  disabled?: boolean;
-}
-
-function StatStepper({ value, onChange, disabled }: StatStepperProps) {
-  return (
-    <div className="flex items-center justify-center gap-1">
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-7 w-7"
-        disabled={disabled || value <= 0}
-        onClick={() => onChange(Math.max(0, value - 1))}
-        aria-label="Verlagen"
-      >
-        <Minus className="w-3 h-3" />
-      </Button>
-      <span className="min-w-[2ch] text-center font-medium tabular-nums">{value}</span>
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-7 w-7"
-        disabled={disabled}
-        onClick={() => onChange(value + 1)}
-        aria-label="Verhogen"
-      >
-        <Plus className="w-3 h-3" />
-      </Button>
-    </div>
-  );
-}
 
 interface PlayerStats {
   id: string;

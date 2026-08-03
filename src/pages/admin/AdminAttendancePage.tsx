@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search } from 'lucide-react';
+import { StatStepper } from '@/components/admin/StatStepper';
 
 interface SignupWithProfile {
   id: string;
@@ -299,40 +300,41 @@ export default function AdminAttendancePage() {
                         <div className="grid grid-cols-3 gap-2">
                           <div>
                             <label className="text-xs text-muted-foreground">Latjes</label>
-                            <Input
-                              type="number"
-                              min={0}
-                              inputMode="numeric"
-                              value={draft.crossbars_hit}
-                              onChange={(e) => setField('crossbars_hit', e.target.value)}
-                              className="h-9"
-                            />
+                            <div className="h-9 flex items-center">
+                              <StatStepper
+                                value={Number(draft.crossbars_hit) || 0}
+                                onChange={(v) => setField('crossbars_hit', String(v))}
+                              />
+                            </div>
                           </div>
                           <div>
                             <label className="text-xs text-muted-foreground">Schotkracht</label>
                             <Input
-                              type="number"
-                              min={0}
-                              step="0.1"
+                              type="text"
                               inputMode="decimal"
                               value={draft.shooting_speed}
-                              onChange={(e) => setField('shooting_speed', e.target.value)}
+                              onChange={(e) => {
+                                const v = e.target.value.replace(',', '.');
+                                if (v === '' || /^\d*\.?\d*$/.test(v)) setField('shooting_speed', v);
+                              }}
                               className="h-9"
                             />
                           </div>
                           <div>
                             <label className="text-xs text-muted-foreground">Snelheid</label>
                             <Input
-                              type="number"
-                              min={0}
-                              step="0.1"
+                              type="text"
                               inputMode="decimal"
                               value={draft.running_speed}
-                              onChange={(e) => setField('running_speed', e.target.value)}
+                              onChange={(e) => {
+                                const v = e.target.value.replace(',', '.');
+                                if (v === '' || /^\d*\.?\d*$/.test(v)) setField('running_speed', v);
+                              }}
                               className="h-9"
                             />
                           </div>
                         </div>
+
 
                         {isDirty && (
                           <div className="flex justify-end gap-2">
