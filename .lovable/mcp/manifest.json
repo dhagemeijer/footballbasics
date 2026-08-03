@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://wemmmtbyqclcxtlxqmen.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "football-basics",
+      "version": "0.1.0",
+      "title": "Football Basics"
+    },
+    "tools": [
+      {
+        "name": "list_training_sessions",
+        "title": "List training sessions",
+        "description": "List upcoming or past Football Basics training sessions with date, time, location and title.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "upcoming_only": {
+              "type": "boolean",
+              "description": "Only return sessions from today onwards. Defaults to true."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of sessions to return (default 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "sign_up_for_training",
+        "title": "Sign up for a training session",
+        "description": "Sign the current player up for a Football Basics training session by session id.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "session_id": {
+              "type": "string",
+              "description": "The id of the training session to join."
+            }
+          },
+          "required": [
+            "session_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_my_stats",
+        "title": "Get my player stats",
+        "description": "Get the signed-in player's Football Basics profile and stats (sessions attended, crossbars hit, speeds).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_leaderboard",
+        "title": "Get the player leaderboard",
+        "description": "Get the Football Basics player ranking by sessions attended or crossbars hit.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "sort_by": {
+              "type": "string",
+              "enum": [
+                "sessions_attended",
+                "crossbars_hit"
+              ],
+              "description": "Ranking metric, defaults to sessions_attended."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Number of players to return (default 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "submit_training_suggestion",
+        "title": "Submit a training focus suggestion",
+        "description": "Submit a suggestion for what a Football Basics training should focus on, optionally tied to a session.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "suggestion": {
+              "type": "string",
+              "description": "The training focus suggestion text."
+            },
+            "session_id": {
+              "type": "string",
+              "description": "Optional id of the session the suggestion relates to."
+            }
+          },
+          "required": [
+            "suggestion"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
