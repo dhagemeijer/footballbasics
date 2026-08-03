@@ -51,6 +51,7 @@ export default function AdminAttendancePage() {
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statsDrafts, setStatsDrafts] = useState<Record<string, StatsDraft>>({});
 
   // Fetch session details
   const { data: session, isLoading: sessionLoading } = useQuery({
