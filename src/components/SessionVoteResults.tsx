@@ -46,21 +46,21 @@ export function SessionVoteResults({ sessionId, refreshKey = 0, compact }: Props
         <BarChart3 className="w-3.5 h-3.5" />
         Stemmen van alle spelers ({total})
       </p>
-      {FOCUS_OPTIONS.map((opt) => {
-        const value = counts[opt] || 0;
-        return (
-          <div key={opt} className="flex items-center gap-2">
-            <span className="text-xs w-24 shrink-0">{opt}</span>
-            <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all"
-                style={{ width: `${(value / max) * 100}%` }}
-              />
-            </div>
-            <span className="text-xs tabular-nums w-5 text-right">{value}</span>
+      {[...FOCUS_OPTIONS]
+        .map((opt) => ({ opt, value: counts[opt] || 0 }))
+        .sort((a, b) => b.value - a.value || a.opt.localeCompare(b.opt))
+        .map(({ opt, value }) => (
+        <div key={opt} className="flex items-center gap-2">
+          <span className="text-xs w-24 shrink-0">{opt}</span>
+          <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all"
+              style={{ width: `${(value / max) * 100}%` }}
+            />
           </div>
-        );
-      })}
+          <span className="text-xs tabular-nums w-5 text-right">{value}</span>
+        </div>
+        ))}
     </div>
   );
 }
