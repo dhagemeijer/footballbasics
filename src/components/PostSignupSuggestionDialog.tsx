@@ -13,7 +13,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Lightbulb, Send } from 'lucide-react';
 import { FOCUS_OPTIONS } from '@/lib/trainingFocus';
-import { SessionVoteResults } from '@/components/SessionVoteResults';
 
 interface Props {
   open: boolean;
@@ -39,15 +38,9 @@ export function PostSignupSuggestionDialog({
   const { toast } = useToast();
   const [selected, setSelected] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasVoted, setHasVoted] = useState(false);
-  const [resultsKey, setResultsKey] = useState(0);
 
   useEffect(() => {
-    if (open) {
-      setSelected(initialOptions || []);
-      setHasVoted((initialOptions?.length || 0) > 0);
-      setResultsKey((k) => k + 1);
-    }
+    if (open) setSelected(initialOptions || []);
   }, [open, initialOptions]);
 
   const close = () => {
@@ -87,9 +80,8 @@ export function PostSignupSuggestionDialog({
       title: 'Bedankt! 💡',
       description: suggestionId ? 'Je stem is aangepast.' : 'Je stem is uitgebracht.',
     });
-    setHasVoted(true);
-    setResultsKey((k) => k + 1);
     onSaved?.();
+    close();
   };
 
   return (
@@ -119,15 +111,9 @@ export function PostSignupSuggestionDialog({
           ))}
         </div>
 
-        {hasVoted && sessionId && (
-          <div className="pt-2 border-t border-border">
-            <SessionVoteResults sessionId={sessionId} refreshKey={resultsKey} compact />
-          </div>
-        )}
-
         <div className="flex gap-3 pt-2">
           <Button variant="outline" onClick={close} disabled={isSaving} className="flex-1">
-            {hasVoted ? 'Sluiten' : 'Overslaan'}
+            Overslaan
           </Button>
           <Button
             onClick={handleSubmit}
@@ -139,7 +125,7 @@ export function PostSignupSuggestionDialog({
             ) : (
               <Send className="w-4 h-4 mr-2" />
             )}
-            {suggestionId || hasVoted ? 'Stem aanpassen' : 'Stem uitbrengen'}
+            {suggestionId ? 'Stem aanpassen' : 'Stem uitbrengen'}
           </Button>
         </div>
       </DialogContent>
