@@ -51,7 +51,6 @@ export type Database = {
           crossbars_hit: number | null
           first_name: string
           id: string
-          is_admin: boolean | null
           last_login_at: string | null
           running_speed: number | null
           session_quota: number | null
@@ -66,7 +65,6 @@ export type Database = {
           crossbars_hit?: number | null
           first_name: string
           id?: string
-          is_admin?: boolean | null
           last_login_at?: string | null
           running_speed?: number | null
           session_quota?: number | null
@@ -81,7 +79,6 @@ export type Database = {
           crossbars_hit?: number | null
           first_name?: string
           id?: string
-          is_admin?: boolean | null
           last_login_at?: string | null
           running_speed?: number | null
           session_quota?: number | null

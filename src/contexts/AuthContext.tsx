@@ -8,7 +8,7 @@ interface Profile {
   username: string;
   first_name: string;
   avatar_id: number;
-  is_admin: boolean;
+  
   sessions_attended: number;
   crossbars_hit: number;
   running_speed: number;
