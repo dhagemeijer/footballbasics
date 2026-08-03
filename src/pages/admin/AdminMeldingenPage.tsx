@@ -131,7 +131,17 @@ export default function AdminMeldingenPage() {
                             )}
                           </div>
                           <p className={`mt-1 ${unread ? 'font-bold' : 'font-medium'}`}>{n.title}</p>
-                          <p className="text-sm text-muted-foreground break-words">{n.message}</p>
+                          {suggestion && suggestion.options.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {suggestion.options.map((opt) => (
+                                <Badge key={opt} variant="outline">
+                                  {opt}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground break-words">{n.message}</p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1">
                             {n.created_at
                               ? format(new Date(n.created_at), "d MMMM yyyy 'om' HH:mm", { locale: nl })

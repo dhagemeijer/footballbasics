@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface Suggestion {
   id: string;
   suggestion: string;
+  options: string[];
   created_at: string;
   user_id: string;
   session_id: string | null;
@@ -46,7 +47,8 @@ export function useSuggestions() {
 
       const enriched: Suggestion[] = suggestionsData.map(s => ({
         id: s.id,
-        suggestion: s.suggestion,
+        suggestion: s.suggestion || '',
+        options: s.options || [],
         created_at: s.created_at || '',
         user_id: s.user_id,
         session_id: s.session_id,

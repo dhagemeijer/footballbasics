@@ -55,10 +55,12 @@ export function SuggestionDetailDialog({
         setTrainingLocation(session.location || '');
         // Prepend suggestion to existing description
         const existingDesc = session.description || '';
+        const focusText =
+          suggestion.options.length > 0
+            ? `Focus: ${suggestion.options.join(', ')}`
+            : suggestion.suggestion || '';
         setTrainingDescription(
-          existingDesc 
-            ? `${suggestion.suggestion}\n\n${existingDesc}`
-            : suggestion.suggestion
+          existingDesc && focusText ? `${focusText}\n\n${existingDesc}` : focusText || existingDesc
         );
         setShowTrainingEdit(true);
       }
@@ -136,7 +138,7 @@ export function SuggestionDetailDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Training Suggestie
+            Stem van speler
             {statusBadge[suggestion.status]}
           </DialogTitle>
           <DialogDescription>
@@ -152,9 +154,19 @@ export function SuggestionDetailDialog({
               <span className="font-medium">{suggestion.profile?.first_name || 'Speler'}</span>
             </div>
 
-            {/* Suggestion text */}
+            {/* Gekozen opties */}
             <div className="bg-secondary/50 rounded-lg p-4">
-              <p>{suggestion.suggestion}</p>
+              {suggestion.options.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {suggestion.options.map((opt) => (
+                    <Badge key={opt} variant="secondary">
+                      {opt}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p>{suggestion.suggestion || 'Geen keuze doorgegeven'}</p>
+              )}
             </div>
 
             {/* Linked session */}
