@@ -157,6 +157,44 @@ export default function AdminStatsPage() {
     adjustStatMutation.mutate({ id, field, value });
   };
 
+  const [speedDrafts, setSpeedDrafts] = useState<Record<string, string>>({});
+
+  const renderSpeedInput = (
+    player: PlayerStats,
+    field: 'shooting_speed' | 'running_speed',
+  ) => {
+    const key = `${player.id}:${field}`;
+    const value = speedDrafts[key] ?? String(player[field] ?? 0);
+    return (
+      <Input
+        type="text"
+        inputMode="decimal"
+        className="h-9 w-24 mx-auto text-center"
+        disabled={pendingId === player.id}
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value.replace(',', '.');
+          if (v === '' || /^\d*\.?\d*$/.test(v)) {
+            setSpeedDrafts((prev) => ({ ...prev, [key]: v }));
+          }
+        }}
+        onBlur={() => {
+          const raw = speedDrafts[key];
+          if (raw === undefined) return;
+          const num = Number(raw);
+          setSpeedDrafts((prev) => {
+            const next = { ...prev };
+            delete next[key];
+            return next;
+          });
+          if (!Number.isFinite(num) || num === (player[field] ?? 0)) return;
+          adjustStat(player.id, field, num);
+        }}
+      />
+    );
+  };
+
+
 
 
   const handleEditPlayer = (player: PlayerStats) => {
