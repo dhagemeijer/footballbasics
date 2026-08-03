@@ -273,11 +273,81 @@ export default function AdminSpelersPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">Spelers Beheren</h1>
             <p className="text-muted-foreground">Overzicht van alle geregistreerde spelers</p>
           </div>
+          <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Speler aanmaken</span>
+          </Button>
         </div>
+
+        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nieuwe speler aanmaken</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-first-name">Voornaam</Label>
+                <Input
+                  id="new-first-name"
+                  value={newPlayer.first_name}
+                  onChange={(e) => setNewPlayer({ ...newPlayer, first_name: e.target.value })}
+                  placeholder="Bijv. Sem"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-username">Gebruikersnaam</Label>
+                <Input
+                  id="new-username"
+                  value={newPlayer.username}
+                  onChange={(e) => setNewPlayer({ ...newPlayer, username: e.target.value.replace(/\s/g, '').toLowerCase() })}
+                  placeholder="Bijv. sem10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Wachtwoord</Label>
+                <Input
+                  id="new-password"
+                  type="text"
+                  value={newPlayer.password}
+                  onChange={(e) => setNewPlayer({ ...newPlayer, password: e.target.value })}
+                  placeholder="Minimaal 6 tekens"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-quota">Strippenkaart (aantal trainingen)</Label>
+                <Input
+                  id="new-quota"
+                  type="number"
+                  min="0"
+                  value={newPlayer.session_quota}
+                  onChange={(e) => setNewPlayer({ ...newPlayer, session_quota: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Kies een avatar</Label>
+                <AvatarSelector
+                  selectedId={newPlayer.avatar_id}
+                  onSelect={(id) => setNewPlayer({ ...newPlayer, avatar_id: id })}
+                />
+              </div>
+              <Button
+                onClick={handleCreatePlayer}
+                className="w-full"
+                disabled={createPlayerMutation.isPending}
+              >
+                {createPlayerMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Speler aanmaken
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
 
         <Card>
           <CardHeader>
