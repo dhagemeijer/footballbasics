@@ -12,7 +12,41 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, Trophy, Pencil, AlertCircle, Plus, Minus } from 'lucide-react';
+
+interface StatStepperProps {
+  value: number;
+  onChange: (newValue: number) => void;
+  disabled?: boolean;
+}
+
+function StatStepper({ value, onChange, disabled }: StatStepperProps) {
+  return (
+    <div className="flex items-center justify-center gap-1">
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-7 w-7"
+        disabled={disabled || value <= 0}
+        onClick={() => onChange(Math.max(0, value - 1))}
+        aria-label="Verlagen"
+      >
+        <Minus className="w-3 h-3" />
+      </Button>
+      <span className="min-w-[2ch] text-center font-medium tabular-nums">{value}</span>
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-7 w-7"
+        disabled={disabled}
+        onClick={() => onChange(value + 1)}
+        aria-label="Verhogen"
+      >
+        <Plus className="w-3 h-3" />
+      </Button>
+    </div>
+  );
+}
 
 interface PlayerStats {
   id: string;
@@ -108,6 +142,54 @@ export default function AdminStatsPage() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     },
   });
+
+  type NumericStatField =
+    | 'sessions_attended'
+    | 'crossbars_hit'
+    | 'shooting_speed'
+    | 'running_speed'
+    | 'session_quota';
+
+
+
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const adjustStatMutation = useMutation({
+    mutationFn: async ({ id, field, value }: { id: string; field: NumericStatField; value: number }) => {
+      const payload: Record<NumericStatField, number | undefined> = {
+        sessions_attended: undefined,
+        crossbars_hit: undefined,
+        shooting_speed: undefined,
+        running_speed: undefined,
+        session_quota: undefined,
+      };
+      payload[field] = value;
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...(payload.sessions_attended !== undefined && { sessions_attended: payload.sessions_attended }),
+          ...(payload.crossbars_hit !== undefined && { crossbars_hit: payload.crossbars_hit }),
+          ...(payload.shooting_speed !== undefined && { shooting_speed: payload.shooting_speed }),
+          ...(payload.running_speed !== undefined && { running_speed: payload.running_speed }),
+          ...(payload.session_quota !== undefined && { session_quota: payload.session_quota }),
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onMutate: ({ id }) => setPendingId(id),
+    onSettled: () => setPendingId(null),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const adjustStat = (id: string, field: NumericStatField, value: number) => {
+    adjustStatMutation.mutate({ id, field, value });
+  };
+
+
 
   const handleEditPlayer = (player: PlayerStats) => {
     setEditingPlayer(player);
@@ -218,7 +300,13 @@ export default function AdminStatsPage() {
                               </div>
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.isPlayerOnly ? player.session_quota : '-'}
+                              {player.isPlayerOnly ? (
+                                <StatStepper
+                                  value={player.session_quota}
+                                  disabled={pendingId === player.id}
+                                  onChange={(v) => adjustStat(player.id, 'session_quota', v)}
+                                />
+                              ) : '-'}
                             </TableCell>
                             <TableCell className="text-center font-medium">
                               {trainingsRemaining !== null ? (
@@ -231,16 +319,32 @@ export default function AdminStatsPage() {
                               ) : '-'}
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.sessions_attended || 0}
+                              <StatStepper
+                                value={player.sessions_attended || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'sessions_attended', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.crossbars_hit || 0}
+                              <StatStepper
+                                value={player.crossbars_hit || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'crossbars_hit', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.shooting_speed || 0}
+                              <StatStepper
+                                value={player.shooting_speed || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'shooting_speed', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.running_speed || 0}
+                              <StatStepper
+                                value={player.running_speed || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'running_speed', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-right">
                               <Button
@@ -268,30 +372,71 @@ export default function AdminStatsPage() {
                     return (
                       <div 
                         key={player.id} 
-                        className="flex items-center gap-3 p-3 border border-border rounded-lg"
+                        className="p-3 border border-border rounded-lg space-y-3"
                       >
-                        <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
-                        
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{player.first_name}</p>
-                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
-                            <span>🏃 {player.sessions_attended}</span>
-                            <span>🥅 {player.crossbars_hit}</span>
+                        <div className="flex items-center gap-3">
+                          <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{player.first_name}</p>
                             {player.isPlayerOnly && trainingsRemaining !== null && (
-                              <span className={trainingsRemaining <= 0 ? 'text-destructive' : ''}>
-                                📋 {trainingsRemaining} over
-                              </span>
+                              <p className={`text-xs mt-0.5 ${trainingsRemaining <= 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                📋 {trainingsRemaining} trainingen over
+                              </p>
                             )}
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditPlayer(player)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
                         </div>
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditPlayer(player)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
+                        <div className="space-y-2">
+                          {player.isPlayerOnly && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Strippenkaart</span>
+                              <StatStepper
+                                value={player.session_quota}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'session_quota', v)}
+                              />
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Trainingen</span>
+                            <StatStepper
+                              value={player.sessions_attended || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'sessions_attended', v)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Lat geraakt</span>
+                            <StatStepper
+                              value={player.crossbars_hit || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'crossbars_hit', v)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Schot (km/u)</span>
+                            <StatStepper
+                              value={player.shooting_speed || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'shooting_speed', v)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Sprint (km/u)</span>
+                            <StatStepper
+                              value={player.running_speed || 0}
+                              disabled={pendingId === player.id}
+                              onChange={(v) => adjustStat(player.id, 'running_speed', v)}
+                            />
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
