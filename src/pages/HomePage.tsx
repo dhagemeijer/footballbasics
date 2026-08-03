@@ -9,16 +9,15 @@ import { UpcomingTrainings } from '@/components/UpcomingTrainings';
 import { supabase } from '@/integrations/supabase/client';
 import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 import logo from '@/assets/logo.png';
-import goalIcon from '@/assets/goal-icon.png';
-import playerIcon from '@/assets/player-icon.png';
-import footballIcon from '@/assets/football-icon.png';
 import { 
   Calendar, 
   Trophy, 
   Zap, 
   Target,
   ArrowRight,
-  Medal
+  Medal,
+  Users,
+  CalendarCheck
 } from 'lucide-react';
 
 interface HomeStats {
