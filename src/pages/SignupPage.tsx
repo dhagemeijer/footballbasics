@@ -9,6 +9,7 @@ import { AvatarSelector } from '@/components/AvatarSelector';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus } from 'lucide-react';
 import { Layout } from '@/components/Layout';
+import fbTextLogo from '@/assets/fb_app_tekstlogo.png';
 
 export default function SignupPage() {
   const [step, setStep] = useState<'info' | 'avatar'>('info');
@@ -83,7 +84,11 @@ export default function SignupPage() {
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
         <Card className="w-full max-w-md animate-scale-in">
           <CardHeader className="text-center">
-            <div className="text-6xl mb-4">🌟</div>
+            <img
+              src={fbTextLogo}
+              alt="Football Basics - more skills, more fun"
+              className="w-full max-w-[240px] mx-auto mb-4"
+            />
             <CardTitle className="text-2xl">
               {step === 'info' ? 'Word lid van de academie!' : 'Kies je avatar!'}
             </CardTitle>
