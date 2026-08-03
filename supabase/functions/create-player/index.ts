@@ -106,6 +106,10 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (pkg.trainer) {
+      await admin.from("user_roles").insert({ user_id: created.user.id, role: "trainer" });
+    }
+
     return new Response(JSON.stringify({ success: true, user_id: created.user.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
