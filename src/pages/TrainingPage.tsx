@@ -31,15 +31,8 @@ export default function TrainingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [signingUp, setSigningUp] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [user]);
-
-  if (!authLoading && !user) {
-    return <Navigate to="/inloggen" replace />;
-  }
-
   const fetchSessions = async () => {
+
     setIsLoading(true);
     
     // Fetch all sessions
