@@ -4,6 +4,7 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users, Calendar, Trophy, Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { NotificationBadge } from '@/components/NotificationBadge';
 
 export default function AdminPage() {
   const { isTrainerOrAdmin, isLoading } = useAuth();
@@ -41,7 +42,8 @@ export default function AdminPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {adminCards.map((card) => (
             <Link key={card.to} to={card.to}>
-              <Card className="hover-lift h-full">
+              <Card className="hover-lift h-full relative">
+                {card.to === '/admin/meldingen' && <NotificationBadge />}
                 <CardHeader>
                   <card.icon className="w-10 h-10 text-primary mb-2" />
                   <CardTitle>{card.title}</CardTitle>
