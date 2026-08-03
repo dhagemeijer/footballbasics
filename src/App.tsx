@@ -41,6 +41,7 @@ const App = () => (
             <Route path="/admin/trainingen" element={<AdminTrainingsPage />} />
             <Route path="/admin/spelers" element={<AdminSpelersPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
+            <Route path="/admin/meldingen" element={<AdminMeldingenPage />} />
             <Route path="/admin/aanwezigheid/:sessionId" element={<AdminAttendancePage />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="*" element={<NotFound />} />

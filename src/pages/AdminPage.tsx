@@ -38,7 +38,7 @@ export default function AdminPage() {
           <p className="text-muted-foreground">Beheer trainingen, spelers en statistieken</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {adminCards.map((card) => (
             <Link key={card.to} to={card.to}>
               <Card className="hover-lift h-full">
