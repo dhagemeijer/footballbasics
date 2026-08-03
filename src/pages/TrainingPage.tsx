@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO, isAfter, isBefore } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { Calendar, Clock, Users, Check, X, Loader2 } from 'lucide-react';
+import { PostSignupSuggestionDialog } from '@/components/PostSignupSuggestionDialog';
 
 interface TrainingSession {
   id: string;
@@ -30,6 +31,7 @@ export default function TrainingPage() {
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [signingUp, setSigningUp] = useState<string | null>(null);
+  const [suggestFor, setSuggestFor] = useState<{ id: string; title: string } | null>(null);
 
   const fetchSessions = async () => {
 
