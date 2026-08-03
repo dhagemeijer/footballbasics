@@ -146,10 +146,24 @@ export default function AdminStatsPage() {
   // Quick +/- adjustment mutation
   const [pendingId, setPendingId] = useState<string | null>(null);
   const adjustStatMutation = useMutation({
-    mutationFn: async ({ id, field, value }: { id: string; field: keyof PlayerStats; value: number }) => {
+    mutationFn: async ({ id, field, value }: { id: string; field: NumericStatField; value: number }) => {
+      const payload: Record<NumericStatField, number | undefined> = {
+        sessions_attended: undefined,
+        crossbars_hit: undefined,
+        shooting_speed: undefined,
+        running_speed: undefined,
+        session_quota: undefined,
+      };
+      payload[field] = value;
       const { error } = await supabase
         .from('profiles')
-        .update({ [field]: value })
+        .update({
+          ...(payload.sessions_attended !== undefined && { sessions_attended: payload.sessions_attended }),
+          ...(payload.crossbars_hit !== undefined && { crossbars_hit: payload.crossbars_hit }),
+          ...(payload.shooting_speed !== undefined && { shooting_speed: payload.shooting_speed }),
+          ...(payload.running_speed !== undefined && { running_speed: payload.running_speed }),
+          ...(payload.session_quota !== undefined && { session_quota: payload.session_quota }),
+        })
         .eq('id', id);
       if (error) throw error;
     },
