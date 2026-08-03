@@ -300,7 +300,13 @@ export default function AdminStatsPage() {
                               </div>
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.isPlayerOnly ? player.session_quota : '-'}
+                              {player.isPlayerOnly ? (
+                                <StatStepper
+                                  value={player.session_quota}
+                                  disabled={pendingId === player.id}
+                                  onChange={(v) => adjustStat(player.id, 'session_quota', v)}
+                                />
+                              ) : '-'}
                             </TableCell>
                             <TableCell className="text-center font-medium">
                               {trainingsRemaining !== null ? (
@@ -313,16 +319,32 @@ export default function AdminStatsPage() {
                               ) : '-'}
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.sessions_attended || 0}
+                              <StatStepper
+                                value={player.sessions_attended || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'sessions_attended', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.crossbars_hit || 0}
+                              <StatStepper
+                                value={player.crossbars_hit || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'crossbars_hit', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.shooting_speed || 0}
+                              <StatStepper
+                                value={player.shooting_speed || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'shooting_speed', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-center font-medium">
-                              {player.running_speed || 0}
+                              <StatStepper
+                                value={player.running_speed || 0}
+                                disabled={pendingId === player.id}
+                                onChange={(v) => adjustStat(player.id, 'running_speed', v)}
+                              />
                             </TableCell>
                             <TableCell className="text-right">
                               <Button
