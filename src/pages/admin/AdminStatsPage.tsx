@@ -185,7 +185,7 @@ export default function AdminStatsPage() {
     },
   });
 
-  const adjustStat = (id: string, field: keyof PlayerStats, value: number) => {
+  const adjustStat = (id: string, field: NumericStatField, value: number) => {
     adjustStatMutation.mutate({ id, field, value });
   };
 
