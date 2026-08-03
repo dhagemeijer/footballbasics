@@ -11,6 +11,7 @@ import { format, parseISO, isAfter, isBefore } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { Calendar, Clock, Users, Check, X, Loader2, Lightbulb } from 'lucide-react';
 import { PostSignupSuggestionDialog } from '@/components/PostSignupSuggestionDialog';
+import { SessionVoteResults } from '@/components/SessionVoteResults';
 
 interface TrainingSession {
   id: string;
@@ -36,10 +37,10 @@ export default function TrainingPage() {
     sessionId: string;
     title: string;
     suggestionId: string | null;
-    text: string;
+    options: string[];
   } | null>(null);
   const [mySuggestions, setMySuggestions] = useState<
-    Record<string, { id: string; suggestion: string }>
+    Record<string, { id: string; options: string[] }>
   >({});
 
   const fetchSessions = async () => {
@@ -81,12 +82,12 @@ export default function TrainingPage() {
 
       const { data: sugg } = await supabase
         .from('training_focus_suggestions')
-        .select('id, suggestion, session_id')
+        .select('id, options, session_id')
         .eq('user_id', user.id)
         .not('session_id', 'is', null);
-      const map: Record<string, { id: string; suggestion: string }> = {};
+      const map: Record<string, { id: string; options: string[] }> = {};
       (sugg || []).forEach((s) => {
-        if (s.session_id) map[s.session_id] = { id: s.id, suggestion: s.suggestion };
+        if (s.session_id) map[s.session_id] = { id: s.id, options: s.options || [] };
       });
       setMySuggestions(map);
     }
@@ -236,7 +237,7 @@ export default function TrainingPage() {
                         sessionId: session.id,
                         title: session.title,
                         suggestionId: mySuggestions[session.id]?.id ?? null,
-                        text: mySuggestions[session.id]?.suggestion ?? '',
+                        options: mySuggestions[session.id]?.options ?? [],
                       })
                     }
                   />
@@ -283,7 +284,7 @@ export default function TrainingPage() {
         sessionId={editSuggestion?.sessionId ?? null}
         sessionTitle={editSuggestion?.title}
         suggestionId={editSuggestion?.suggestionId}
-        initialText={editSuggestion?.text}
+        initialOptions={editSuggestion?.options}
         onSaved={fetchSessions}
       />
     </Layout>
@@ -306,7 +307,7 @@ function SessionCard({
   onCancelSignup: (id: string) => void;
   signingUp: string | null;
   isLoggedIn: boolean;
-  suggestion?: { id: string; suggestion: string };
+  suggestion?: { id: string; options: string[] };
   onSuggest?: () => void;
 }) {
   const spotsLeft = session.max_participants - (session.signup_count || 0);
@@ -362,7 +363,7 @@ function SessionCard({
               {session.user_signed_up && onSuggest && (
                 <Button variant="outline" size="sm" onClick={onSuggest}>
                   <Lightbulb className="w-4 h-4 mr-1" />
-                  {suggestion ? 'Suggestie bewerken' : 'Suggestie geven'}
+                  {suggestion && suggestion.options.length > 0 ? 'Stem aanpassen' : 'Stem uitbrengen'}
                 </Button>
               )}
               {session.user_signed_up ? (
@@ -403,6 +404,12 @@ function SessionCard({
             </div>
           )}
         </div>
+
+        {suggestion && suggestion.options.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <SessionVoteResults sessionId={session.id} compact />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
