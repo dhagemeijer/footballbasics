@@ -120,6 +120,8 @@ export default function TrainingPage() {
         title: 'Ingeschreven! 🎉',
         description: 'Je bent succesvol ingeschreven voor deze training.',
       });
+      const s = sessions.find((x) => x.id === sessionId);
+      setSuggestFor({ id: sessionId, title: s?.title || '' });
       fetchSessions();
     }
     
@@ -239,6 +241,12 @@ export default function TrainingPage() {
           )}
         </div>
       </div>
+      <PostSignupSuggestionDialog
+        open={!!suggestFor}
+        onOpenChange={(open) => !open && setSuggestFor(null)}
+        sessionId={suggestFor?.id ?? null}
+        sessionTitle={suggestFor?.title}
+      />
     </Layout>
   );
 }
