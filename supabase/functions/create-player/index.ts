@@ -44,7 +44,25 @@ Deno.serve(async (req) => {
     const password = String(body.password ?? "");
     const firstName = String(body.first_name ?? "").trim();
     const avatarId = Number(body.avatar_id ?? 1);
-    const sessionQuota = Number(body.session_quota ?? 10);
+
+    const PACKAGES: Record<string, { quota: number; trainer: boolean }> = {
+      woensdag_los: { quota: 2, trainer: false },
+      zondag_los: { quota: 2, trainer: false },
+      woensdag_5: { quota: 6, trainer: false },
+      zondag_5: { quota: 6, trainer: false },
+      woensdag_10: { quota: 11, trainer: false },
+      zondag_10: { quota: 11, trainer: false },
+      trainer: { quota: 0, trainer: true },
+    };
+    const packageKey = String(body.package ?? "woensdag_10");
+    const pkg = PACKAGES[packageKey];
+    if (!pkg) {
+      return new Response(JSON.stringify({ error: "Ongeldig pakket" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const sessionQuota = pkg.quota;
 
     if (!username || !password || !firstName) {
       return new Response(JSON.stringify({ error: "Vul alle velden in" }), {
@@ -86,6 +104,10 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (pkg.trainer) {
+      await admin.from("user_roles").insert({ user_id: created.user.id, role: "trainer" });
     }
 
     return new Response(JSON.stringify({ success: true, user_id: created.user.id }), {

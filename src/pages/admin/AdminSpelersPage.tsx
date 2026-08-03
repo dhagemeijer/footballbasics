@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AvatarSelector } from '@/components/AvatarSelector';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +27,18 @@ const ALL_ROLES = [
 ] as const;
 
 type AppRole = 'player' | 'trainer' | 'admin';
+
+const PACKAGE_OPTIONS = [
+  { value: 'woensdag_los', label: 'Woensdag losse training', quota: 2 },
+  { value: 'zondag_los', label: 'Zondag losse training', quota: 2 },
+  { value: 'woensdag_5', label: 'Woensdag 5 strippen', quota: 6 },
+  { value: 'zondag_5', label: 'Zondag 5 strippen', quota: 6 },
+  { value: 'woensdag_10', label: 'Woensdag 10 strippen', quota: 11 },
+  { value: 'zondag_10', label: 'Zondag 10 strippen', quota: 11 },
+  { value: 'trainer', label: 'Trainer (geen strippen)', quota: 0 },
+] as const;
+
+type PackageKey = (typeof PACKAGE_OPTIONS)[number]['value'];
 
 interface PlayerWithRoles {
   id: string;
@@ -51,7 +64,7 @@ export default function AdminSpelersPage() {
     username: '',
     password: '',
     avatar_id: 1,
-    session_quota: 10,
+    package: 'woensdag_10' as PackageKey,
   });
 
   const createPlayerMutation = useMutation({
@@ -72,7 +85,7 @@ export default function AdminSpelersPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-players'] });
       toast({ title: 'Speler aangemaakt', description: 'De speler kan nu inloggen.' });
       setIsCreateOpen(false);
-      setNewPlayer({ first_name: '', username: '', password: '', avatar_id: 1, session_quota: 10 });
+      setNewPlayer({ first_name: '', username: '', password: '', avatar_id: 1, package: 'woensdag_10' });
     },
     onError: (error: Error) => {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
@@ -318,14 +331,27 @@ export default function AdminSpelersPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-quota">Strippenkaart (aantal trainingen)</Label>
-                <Input
-                  id="new-quota"
-                  type="number"
-                  min="0"
-                  value={newPlayer.session_quota}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, session_quota: parseInt(e.target.value) || 0 })}
-                />
+                <Label htmlFor="new-package">Type / Strippenkaart</Label>
+                <Select
+                  value={newPlayer.package}
+                  onValueChange={(v) => setNewPlayer({ ...newPlayer, package: v as PackageKey })}
+                >
+                  <SelectTrigger id="new-package">
+                    <SelectValue placeholder="Kies een optie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PACKAGE_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {newPlayer.package !== 'trainer' && (
+                  <p className="text-xs text-muted-foreground">
+                    Inclusief 1 gratis proeftraining: {PACKAGE_OPTIONS.find((o) => o.value === newPlayer.package)?.quota} trainingen.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Kies een avatar</Label>
