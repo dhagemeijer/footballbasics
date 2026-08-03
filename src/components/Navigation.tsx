@@ -67,11 +67,8 @@ export function Navigation() {
           <div className="hidden md:flex items-center gap-4">
             {user && profile ? (
               <div className="flex items-center gap-3">
-                <Link to="/profiel" className="relative flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <div className="relative">
-                    <AvatarDisplay avatarId={profile.avatar_id} size="sm" />
-                    <NotificationBadge />
-                  </div>
+                <Link to="/profiel" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <AvatarDisplay avatarId={profile.avatar_id} size="sm" />
                   <span className="font-medium">{profile.first_name}</span>
                 </Link>
                 <Button
@@ -97,12 +94,14 @@ export function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            className="md:hidden relative p-2 rounded-lg hover:bg-secondary transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <NotificationBadge />
           </button>
         </div>
+
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
