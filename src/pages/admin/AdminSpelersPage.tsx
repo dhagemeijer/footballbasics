@@ -388,7 +388,109 @@ export default function AdminSpelersPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : players && players.length > 0 ? (
-              <div className="overflow-x-auto">
+              <>
+              {/* Mobile card view */}
+              <div className="space-y-3 md:hidden">
+                {players.map((player) => (
+                  <div key={player.id} className="rounded-lg border border-border p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold truncate">{player.first_name}</p>
+                        <div className="flex gap-1 flex-wrap mt-1">
+                          {player.roles.map((role) => (
+                            <span
+                              key={role}
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadge(role)}`}
+                            >
+                              {getRoleLabel(role)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between gap-2">
+                        <span className="text-muted-foreground">Gebruikersnaam</span>
+                        <span className="truncate">{player.username}</span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-muted-foreground">Aangemeld op</span>
+                        <span className="text-right">{formatDate(player.created_at)}</span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-muted-foreground">Laatst ingelogd</span>
+                        <span className="text-right">{formatDate(player.last_login_at)}</span>
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 gap-2"
+                              onClick={() => handleEditRoles(player)}
+                            >
+                              <Settings2 className="w-4 h-4" />
+                              Rollen
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Rollen beheren voor {player.first_name}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 mt-4">
+                              <p className="text-sm text-muted-foreground">
+                                Selecteer de rollen die je wilt toewijzen aan deze gebruiker.
+                              </p>
+                              <div className="space-y-3">
+                                {ALL_ROLES.map((role) => (
+                                  <div key={role.value} className="flex items-center space-x-3">
+                                    <Checkbox
+                                      id={`m-role-${player.id}-${role.value}`}
+                                      checked={selectedRoles.includes(role.value)}
+                                      onCheckedChange={() => handleRoleToggle(role.value)}
+                                    />
+                                    <Label
+                                      htmlFor={`m-role-${player.id}-${role.value}`}
+                                      className="text-sm font-medium cursor-pointer"
+                                    >
+                                      {role.label}
+                                    </Label>
+                                  </div>
+                                ))}
+                              </div>
+                              <Button
+                                onClick={handleSaveRoles}
+                                className="w-full"
+                                disabled={updateRolesMutation.isPending}
+                              >
+                                {updateRolesMutation.isPending ? (
+                                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                ) : null}
+                                Opslaan
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 text-destructive hover:text-destructive"
+                          onClick={() => setDeletePlayer(player)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden md:block overflow-x-auto">
+
                 <Table>
                   <TableHeader>
                     <TableRow>
