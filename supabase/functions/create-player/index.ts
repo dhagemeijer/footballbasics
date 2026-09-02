@@ -77,6 +77,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    const { data: existingProfile } = await admin
+      .from("profiles")
+      .select("id")
+      .ilike("username", username)
+      .maybeSingle();
+
+    if (existingProfile) {
+      return new Response(JSON.stringify({ error: "Deze gebruikersnaam bestaat al" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email: `${username}@footballbasics.app`,
       password,
@@ -85,11 +98,15 @@ Deno.serve(async (req) => {
 
     if (createError || !created.user) {
       console.error("createUser failed", createError);
-      return new Response(JSON.stringify({ error: createError?.message ?? "Aanmaken mislukt" }), {
+      const msg = /already/i.test(createError?.message ?? "")
+        ? "Deze gebruikersnaam bestaat al"
+        : createError?.message ?? "Aanmaken mislukt";
+      return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
 
     const { error: profileError } = await admin.from("profiles").insert({
