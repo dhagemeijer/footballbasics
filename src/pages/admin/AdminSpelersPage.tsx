@@ -73,7 +73,17 @@ export default function AdminSpelersPage() {
         body: payload,
       });
       if (error) {
-        const message = (data as { error?: string } | null)?.error;
+        let message = (data as { error?: string } | null)?.error;
+        // Read the real error message from the function response body
+        const ctx = (error as unknown as { context?: Response }).context;
+        if (!message && ctx && typeof ctx.json === 'function') {
+          try {
+            const body = await ctx.json();
+            message = (body as { error?: string })?.error;
+          } catch {
+            // ignore parse errors
+          }
+        }
         throw new Error(message || error.message);
       }
       if ((data as { error?: string } | null)?.error) {
@@ -81,6 +91,7 @@ export default function AdminSpelersPage() {
       }
       return data;
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-players'] });
       toast({ title: 'Speler aangemaakt', description: 'De speler kan nu inloggen.' });
