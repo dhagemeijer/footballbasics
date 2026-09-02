@@ -77,6 +77,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    const { data: existingProfile } = await admin
+      .from("profiles")
+      .select("id")
+      .ilike("username", username)
+      .maybeSingle();
+
+    if (existingProfile) {
+      return new Response(JSON.stringify({ error: "Deze gebruikersnaam bestaat al" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email: `${username}@footballbasics.app`,
       password,
@@ -84,11 +97,17 @@ Deno.serve(async (req) => {
     });
 
     if (createError || !created.user) {
-      return new Response(JSON.stringify({ error: createError?.message ?? "Aanmaken mislukt" }), {
+      console.error("createUser failed", createError);
+      const msg = /already/i.test(createError?.message ?? "")
+        ? "Deze gebruikersnaam bestaat al"
+        : createError?.message ?? "Aanmaken mislukt";
+      return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+
 
     const { error: profileError } = await admin.from("profiles").insert({
       user_id: created.user.id,
@@ -99,12 +118,14 @@ Deno.serve(async (req) => {
     });
 
     if (profileError) {
+      console.error("profile insert failed", profileError);
       await admin.auth.admin.deleteUser(created.user.id);
       return new Response(JSON.stringify({ error: profileError.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     if (pkg.trainer) {
       await admin.from("user_roles").insert({ user_id: created.user.id, role: "trainer" });
@@ -114,6 +135,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
+    console.error("create-player error", e);
+
     return new Response(JSON.stringify({ error: (e as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
