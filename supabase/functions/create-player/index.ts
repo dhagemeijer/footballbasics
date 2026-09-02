@@ -101,12 +101,14 @@ Deno.serve(async (req) => {
     });
 
     if (profileError) {
+      console.error("profile insert failed", profileError);
       await admin.auth.admin.deleteUser(created.user.id);
       return new Response(JSON.stringify({ error: profileError.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     if (pkg.trainer) {
       await admin.from("user_roles").insert({ user_id: created.user.id, role: "trainer" });
@@ -116,6 +118,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
+    console.error("create-player error", e);
+
     return new Response(JSON.stringify({ error: (e as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
