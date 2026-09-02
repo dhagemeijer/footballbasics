@@ -84,11 +84,13 @@ Deno.serve(async (req) => {
     });
 
     if (createError || !created.user) {
+      console.error("createUser failed", createError);
       return new Response(JSON.stringify({ error: createError?.message ?? "Aanmaken mislukt" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     const { error: profileError } = await admin.from("profiles").insert({
       user_id: created.user.id,
