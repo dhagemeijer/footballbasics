@@ -195,21 +195,25 @@ export default function AdminSpelersPage() {
   // Delete player mutation
   const deletePlayerMutation = useMutation({
     mutationFn: async (userId: string) => {
-      // Delete from user_roles first
-      const { error: rolesError } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-      
-      if (rolesError) throw rolesError;
-
-      // Delete from profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', userId);
-
-      if (profileError) throw profileError;
+      const { data, error } = await supabase.functions.invoke('delete-player', {
+        body: { user_id: userId },
+      });
+      if (error) {
+        let message = (data as { error?: string } | null)?.error;
+        const ctx = (error as unknown as { context?: Response }).context;
+        if (!message && ctx && typeof ctx.json === 'function') {
+          try {
+            const body = await ctx.json();
+            message = (body as { error?: string })?.error;
+          } catch {
+            // ignore parse errors
+          }
+        }
+        throw new Error(message || error.message);
+      }
+      if ((data as { error?: string } | null)?.error) {
+        throw new Error((data as { error: string }).error);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-players'] });
