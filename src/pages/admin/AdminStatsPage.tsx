@@ -162,6 +162,7 @@ export default function AdminStatsPage() {
   const renderSpeedInput = (
     player: PlayerStats,
     field: 'shooting_speed' | 'running_speed',
+    className = 'h-9 w-24 mx-auto text-center',
   ) => {
     const key = `${player.id}:${field}`;
     const value = speedDrafts[key] ?? String(player[field] ?? 0);
@@ -169,7 +170,7 @@ export default function AdminStatsPage() {
       <Input
         type="text"
         inputMode="decimal"
-        className="h-9 w-24 mx-auto text-center"
+        className={className}
         disabled={pendingId === player.id}
         value={value}
         onChange={(e) => {
@@ -420,11 +421,11 @@ export default function AdminStatsPage() {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm">Schot (km/u)</span>
-                            {renderSpeedInput(player, 'shooting_speed')}
+                            {renderSpeedInput(player, 'shooting_speed', 'h-9 w-24 text-right')}
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm">Snelheid (km/u)</span>
-                            {renderSpeedInput(player, 'running_speed')}
+                            {renderSpeedInput(player, 'running_speed', 'h-9 w-24 text-right')}
                           </div>
                         </div>
                       </div>
