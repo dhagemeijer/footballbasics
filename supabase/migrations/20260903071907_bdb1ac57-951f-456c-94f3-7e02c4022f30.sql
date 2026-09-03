@@ -1,0 +1,12 @@
+REVOKE EXECUTE ON FUNCTION private.sync_profile_stats_from_signups() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION private.sync_profile_stats_on_delete() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION private.admin_notify_user_id() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION private.notify_new_profile() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION private.notify_session_signup() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION private.notify_new_suggestion() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION private.sync_profile_stats_from_signups() TO service_role;
+GRANT EXECUTE ON FUNCTION private.sync_profile_stats_on_delete() TO service_role;
+GRANT EXECUTE ON FUNCTION private.admin_notify_user_id() TO service_role;
+GRANT EXECUTE ON FUNCTION private.notify_new_profile() TO service_role;
+GRANT EXECUTE ON FUNCTION private.notify_session_signup() TO service_role;
+GRANT EXECUTE ON FUNCTION private.notify_new_suggestion() TO service_role;
