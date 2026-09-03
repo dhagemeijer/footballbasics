@@ -13,23 +13,23 @@ export function StatStepper({ value, onChange, disabled }: StatStepperProps) {
       <Button
         variant="outline"
         size="icon"
-        className="h-7 w-7"
+        className="h-9 w-9 md:h-7 md:w-7"
         disabled={disabled || value <= 0}
         onClick={() => onChange(Math.max(0, value - 1))}
         aria-label="Verlagen"
       >
-        <Minus className="w-3 h-3" />
+        <Minus className="w-4 h-4 md:w-3 md:h-3" />
       </Button>
       <span className="min-w-[2ch] text-center font-medium tabular-nums">{value}</span>
       <Button
         variant="outline"
         size="icon"
-        className="h-7 w-7"
+        className="h-9 w-9 md:h-7 md:w-7"
         disabled={disabled}
         onClick={() => onChange(value + 1)}
         aria-label="Verhogen"
       >
-        <Plus className="w-3 h-3" />
+        <Plus className="w-4 h-4 md:w-3 md:h-3" />
       </Button>
     </div>
   );
