@@ -530,158 +530,45 @@ export default function AdminTrainingsPage() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Geplande Trainingen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {sessionsLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : sessions && sessions.length > 0 ? (
-              <>
-              {/* Mobile card view */}
-              <div className="space-y-3 md:hidden">
-                {sessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className={cn(
-                      'rounded-lg border border-border p-4 space-y-3',
-                      session.is_completed && 'opacity-60'
+        <Tabs defaultValue="planned" className="w-full">
+          <Card>
+            <CardHeader className="flex flex-col gap-4">
+              <CardTitle>Trainingen</CardTitle>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="planned">Gepland</TabsTrigger>
+                <TabsTrigger value="completed">Afgerond</TabsTrigger>
+              </TabsList>
+            </CardHeader>
+            <CardContent>
+              {sessionsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : (
+                <>
+                  <TabsContent value="planned">
+                    {plannedSessions.length > 0 ? (
+                      renderSessions(plannedSessions)
+                    ) : (
+                      <p className="text-center text-muted-foreground py-8">
+                        Nog geen geplande trainingen.
+                      </p>
                     )}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 font-semibold">
-                          {session.is_completed && <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />}
-                          <span className="truncate">
-                            {format(new Date(session.session_date), 'EEEE d MMMM', { locale: nl })}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {session.session_time.slice(0, 5)} · {session.location || 'Forum Sport'}
-                        </p>
-                      </div>
-                      <label className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
-                        <Checkbox
-                          checked={session.is_completed}
-                          onCheckedChange={(checked) =>
-                            toggleCompletedMutation.mutate({
-                              sessionId: session.id,
-                              isCompleted: checked as boolean,
-                            })
-                          }
-                        />
-                        Afgerond
-                      </label>
-                    </div>
-                    <p className="text-sm">{session.description || '-'}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Link to={`/admin/aanwezigheid/${session.id}`} className="flex-1 min-w-[120px]">
-                        <Button variant="outline" size="sm" className="w-full gap-2">
-                          <Users className="w-4 h-4" />
-                          Aanwezigheid
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        onClick={() => handleEdit(session as TrainingSession)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                        Bewerken
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(session.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Desktop table */}
-              <div className="hidden md:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[60px]">Afgerond</TableHead>
-                    <TableHead>Datum</TableHead>
-                    <TableHead>Tijd</TableHead>
-                    <TableHead>Locatie</TableHead>
-                    <TableHead>Focus</TableHead>
-                    <TableHead className="text-right">Acties</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sessions.map((session) => (
-                    <TableRow key={session.id} className={session.is_completed ? 'opacity-60' : ''}>
-                      <TableCell>
-                        <Checkbox
-                          checked={session.is_completed}
-                          onCheckedChange={(checked) => 
-                            toggleCompletedMutation.mutate({ 
-                              sessionId: session.id, 
-                              isCompleted: checked as boolean 
-                            })
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {session.is_completed && <CheckCircle className="w-4 h-4 text-green-500" />}
-                          {format(new Date(session.session_date), "EEEE d MMMM", { locale: nl })}
-                        </div>
-                      </TableCell>
-                      <TableCell>{session.session_time.slice(0, 5)}</TableCell>
-                      <TableCell>{session.location || 'Forum Sport'}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {session.description || '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Link to={`/admin/aanwezigheid/${session.id}`}>
-                            <Button variant="ghost" size="icon" title="Aanwezigheid">
-                              <Users className="w-4 h-4" />
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(session as TrainingSession)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(session.id)}
-                            disabled={deleteMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </div>
-              </>
-
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Nog geen trainingen gepland. Klik op "Nieuwe Training" om te beginnen.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+                  </TabsContent>
+                  <TabsContent value="completed">
+                    {completedSessions.length > 0 ? (
+                      renderSessions(completedSessions)
+                    ) : (
+                      <p className="text-center text-muted-foreground py-8">
+                        Nog geen afgeronde trainingen.
+                      </p>
+                    )}
+                  </TabsContent>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </Tabs>
 
         {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
