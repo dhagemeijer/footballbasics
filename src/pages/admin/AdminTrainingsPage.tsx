@@ -37,6 +37,18 @@ interface TrainingSession {
   created_at: string | null;
 }
 
+const classifySession = (session: TrainingSession): 'planned' | 'completed' => {
+  const now = new Date();
+  const today = startOfDay(now);
+  const sessionDay = startOfDay(parseISO(session.session_date));
+
+  if (isBefore(sessionDay, today)) return 'completed';
+  if (isAfter(sessionDay, today)) return 'planned';
+
+  const cutoff = setHours(today, 22);
+  return now >= cutoff ? 'completed' : 'planned';
+};
+
 const LOCATIONS = [
   { value: 'Forum Sport - veld 1', label: 'Forum Sport - veld 1' },
   { value: 'Forum Sport - veld 2', label: 'Forum Sport - veld 2' },
