@@ -74,15 +74,19 @@ Deno.serve(async (req) => {
       return json({ error: "internal_error" }, 500);
     }
 
+    // Spelers-tellingen: alleen aggregaten, geen persoonsgegevens in de response.
     const counts = new Map<string, number>();
-    const { data: countRows, error: countError } = await admin
-      .schema("private")
-      .rpc("get_player_signup_counts_machine");
-    if (countError) {
-      console.error("dennis-read count failed", countError.message);
-    } else {
-      for (const row of (countRows ?? []) as { session_id: string; player_count: number }[]) {
-        counts.set(row.session_id, Number(row.player_count));
+    const sessionIds = (data ?? []).map((s) => s.id);
+    if (sessionIds.length > 0) {
+      const [{ data: playerRoles }, { data: signups }] = await Promise.all([
+        admin.from("user_roles").select("user_id").eq("role", "player"),
+        admin.from("session_signups").select("session_id, user_id").in("session_id", sessionIds),
+      ]);
+      const players = new Set((playerRoles ?? []).map((r) => r.user_id));
+      for (const s of signups ?? []) {
+        if (players.has(s.user_id)) {
+          counts.set(s.session_id, (counts.get(s.session_id) ?? 0) + 1);
+        }
       }
     }
 
