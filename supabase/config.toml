@@ -2,3 +2,6 @@ project_id = "wemmmtbyqclcxtlxqmen"
 
 [functions.create-player]
 verify_jwt = false
+
+[functions.dennis-read]
+verify_jwt = false
