@@ -27,17 +27,18 @@ Create a web application called **"Football Basics"** for a youth football (socc
   - 20 distinct options
 
 ### Pre-configured Accounts
-Create these accounts on app initialization:
+Pre-configured accounts (Admin "Dennis", Trainers "Finn", "Enzo", "Joris")
+are created on app initialization. **Actual credentials are not
+documented here** — see your team's secure credential store /
+password manager. If you are setting up a fresh environment, create
+these accounts through the app's own account-creation flow and store
+the resulting passwords securely; do not add them to this file.
 
-**Admin Account:**
-- Username: Dennis
-- Password: @Football*Basics23
-- Role: Trainer (with admin privileges - Dennis is both a trainer AND has full admin access)
-
-**Trainer Accounts:**
-- Username: Finn | Password: #Finn12 | Role: Trainer
-- Username: Enzo | Password: %Enzo16 | Role: Trainer
-- Username: Joris | Password: &Joris31 | Role: Trainer
+**Security note:** this file previously documented real, working
+account credentials in plaintext. Those credentials must be treated as
+compromised (this repository is/was public) and rotated — see the
+accompanying FB.1A security remediation report for exactly which
+accounts to rotate.
 
 ### Login System
 - Simple login with username and password
