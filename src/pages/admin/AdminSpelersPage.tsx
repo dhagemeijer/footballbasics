@@ -147,6 +147,28 @@ export default function AdminSpelersPage() {
     },
   });
 
+  const sortedPlayers = useMemo(() => {
+    if (!players) return [];
+    if (!sortDirection) return players;
+    return [...players].sort((a, b) => {
+      const nameA = a.first_name.toLowerCase();
+      const nameB = b.first_name.toLowerCase();
+      if (nameA < nameB) return sortDirection === 'asc' ? -1 : 1;
+      if (nameA > nameB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [players, sortDirection]);
+
+  const toggleSort = () => {
+    setSortDirection((prev) => {
+      if (prev === 'asc') return 'desc';
+      if (prev === 'desc') return null;
+      return 'asc';
+    });
+  };
+
+  const SortIcon = sortDirection === 'asc' ? ArrowUp : sortDirection === 'desc' ? ArrowDown : ArrowUpDown;
+
   // Update roles mutation
   const updateRolesMutation = useMutation({
     mutationFn: async ({ userId, newRoles }: { userId: string; newRoles: AppRole[] }) => {
