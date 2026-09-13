@@ -561,7 +561,7 @@ export default function AdminSpelersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {players.map((player) => (
+                    {sortedPlayers.map((player) => (
                       <TableRow key={player.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
