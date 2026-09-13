@@ -415,9 +415,20 @@ export default function AdminSpelersPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Geregistreerde Spelers ({players?.length || 0})
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Geregistreerde Spelers ({players?.length || 0})
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="md:hidden gap-2"
+                onClick={toggleSort}
+              >
+                <SortIcon className="w-4 h-4" />
+                Speler
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
