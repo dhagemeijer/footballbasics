@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AvatarSelector } from '@/components/AvatarSelector';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Users, Settings2, Trash2, Plus } from 'lucide-react';
+import { Loader2, ArrowLeft, Users, Settings2, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 const ALL_ROLES = [
   { value: 'player', label: 'Speler' },
@@ -59,6 +59,7 @@ export default function AdminSpelersPage() {
   const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
   const [deletePlayer, setDeletePlayer] = useState<PlayerWithRoles | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(null);
   const [newPlayer, setNewPlayer] = useState({
     first_name: '',
     username: '',
@@ -145,6 +146,28 @@ export default function AdminSpelersPage() {
       })) as PlayerWithRoles[];
     },
   });
+
+  const sortedPlayers = useMemo(() => {
+    if (!players) return [];
+    if (!sortDirection) return players;
+    return [...players].sort((a, b) => {
+      const nameA = a.first_name.toLowerCase();
+      const nameB = b.first_name.toLowerCase();
+      if (nameA < nameB) return sortDirection === 'asc' ? -1 : 1;
+      if (nameA > nameB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [players, sortDirection]);
+
+  const toggleSort = () => {
+    setSortDirection((prev) => {
+      if (prev === 'asc') return 'desc';
+      if (prev === 'desc') return null;
+      return 'asc';
+    });
+  };
+
+  const SortIcon = sortDirection === 'asc' ? ArrowUp : sortDirection === 'desc' ? ArrowDown : ArrowUpDown;
 
   // Update roles mutation
   const updateRolesMutation = useMutation({
@@ -392,9 +415,20 @@ export default function AdminSpelersPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Geregistreerde Spelers ({players?.length || 0})
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Geregistreerde Spelers ({players?.length || 0})
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="md:hidden gap-2"
+                onClick={toggleSort}
+              >
+                <SortIcon className="w-4 h-4" />
+                Speler
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -406,7 +440,7 @@ export default function AdminSpelersPage() {
               <>
               {/* Mobile card view */}
               <div className="space-y-3 md:hidden">
-                {players.map((player) => (
+                {sortedPlayers.map((player) => (
                   <div key={player.id} className="rounded-lg border border-border p-4 space-y-3">
                     <div className="flex items-center gap-3">
                       <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
@@ -509,7 +543,16 @@ export default function AdminSpelersPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Speler</TableHead>
+                      <TableHead>
+                        <button
+                          type="button"
+                          onClick={toggleSort}
+                          className="flex items-center gap-1 font-medium hover:text-foreground transition-colors"
+                        >
+                          Speler
+                          <SortIcon className="w-4 h-4" />
+                        </button>
+                      </TableHead>
                       <TableHead>Gebruikersnaam</TableHead>
                       <TableHead>Rol(len)</TableHead>
                       <TableHead>Aangemeld op</TableHead>
@@ -518,7 +561,7 @@ export default function AdminSpelersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {players.map((player) => (
+                    {sortedPlayers.map((player) => (
                       <TableRow key={player.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
