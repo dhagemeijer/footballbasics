@@ -59,6 +59,7 @@ export default function AdminSpelersPage() {
   const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
   const [deletePlayer, setDeletePlayer] = useState<PlayerWithRoles | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(null);
   const [newPlayer, setNewPlayer] = useState({
     first_name: '',
     username: '',
