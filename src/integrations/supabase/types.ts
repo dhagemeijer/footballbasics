@@ -278,6 +278,13 @@ export type Database = {
           session_id: string
         }[]
       }
+      get_player_signup_counts_machine: {
+        Args: never
+        Returns: {
+          player_count: number
+          session_id: string
+        }[]
+      }
       get_session_option_votes: {
         Args: { _session_id: string }
         Returns: {
