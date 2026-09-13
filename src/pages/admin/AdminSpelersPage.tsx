@@ -543,7 +543,16 @@ export default function AdminSpelersPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Speler</TableHead>
+                      <TableHead>
+                        <button
+                          type="button"
+                          onClick={toggleSort}
+                          className="flex items-center gap-1 font-medium hover:text-foreground transition-colors"
+                        >
+                          Speler
+                          <SortIcon className="w-4 h-4" />
+                        </button>
+                      </TableHead>
                       <TableHead>Gebruikersnaam</TableHead>
                       <TableHead>Rol(len)</TableHead>
                       <TableHead>Aangemeld op</TableHead>
