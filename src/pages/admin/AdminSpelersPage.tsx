@@ -440,7 +440,7 @@ export default function AdminSpelersPage() {
               <>
               {/* Mobile card view */}
               <div className="space-y-3 md:hidden">
-                {players.map((player) => (
+                {sortedPlayers.map((player) => (
                   <div key={player.id} className="rounded-lg border border-border p-4 space-y-3">
                     <div className="flex items-center gap-3">
                       <AvatarDisplay avatarId={player.avatar_id || 1} size="sm" />
