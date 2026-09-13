@@ -103,10 +103,10 @@ export default function LeaderboardPage() {
     : null;
 
   const sortButtons: { field: SortField; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { field: 'sessions_attended', label: 'Trainingen', icon: Medal },
     { field: 'crossbars_hit', label: 'Latjes', icon: Target },
     { field: 'shooting_speed', label: 'Schotkracht', icon: Trophy },
     { field: 'running_speed', label: 'Snelheid', icon: Zap },
+    { field: 'sessions_attended', label: 'Trainingen', icon: Medal },
   ];
 
   if (!authLoading && !user) {
