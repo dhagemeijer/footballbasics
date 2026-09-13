@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AvatarSelector } from '@/components/AvatarSelector';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Users, Settings2, Trash2, Plus } from 'lucide-react';
+import { Loader2, ArrowLeft, Users, Settings2, Trash2, Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 const ALL_ROLES = [
   { value: 'player', label: 'Speler' },
