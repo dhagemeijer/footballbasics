@@ -30,7 +30,7 @@ export default function LeaderboardPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<SortField>('sessions_attended');
+  const [sortBy, setSortBy] = useState<SortField>('crossbars_hit');
   const [showTrainers, setShowTrainers] = useState(true);
   const [showPlayers, setShowPlayers] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
