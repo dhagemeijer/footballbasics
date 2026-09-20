@@ -55,17 +55,6 @@ export default function AdminAttendancePage() {
   const [statsDrafts, setStatsDrafts] = useState<Record<string, StatsDraft>>({});
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('asc');
 
-  const sortedSignups = useMemo(() => {
-    if (!signups) return undefined;
-    if (!sortDirection) return signups;
-    const dir = sortDirection === 'asc' ? 1 : -1;
-    return [...signups].sort((a, b) => {
-      const an = (a.profile.first_name || a.profile.username).toLowerCase();
-      const bn = (b.profile.first_name || b.profile.username).toLowerCase();
-      return an.localeCompare(bn, 'nl') * dir;
-    });
-  }, [signups, sortDirection]);
-
   // Fetch session details
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['admin-session', sessionId],
