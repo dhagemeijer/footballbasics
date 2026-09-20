@@ -292,9 +292,9 @@ export default function AdminAttendancePage() {
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
-              ) : signups && signups.length > 0 ? (
+              ) : sortedSignups && sortedSignups.length > 0 ? (
                 <div className="space-y-2">
-                  {signups.map((signup) => {
+                  {sortedSignups.map((signup) => {
                     const draft = statsDrafts[signup.id] ?? {
                       crossbars_hit: signup.crossbars_hit?.toString() ?? '',
                       shooting_speed: signup.shooting_speed?.toString() ?? '',
