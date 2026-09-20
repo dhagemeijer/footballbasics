@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search } from 'lucide-react';
+import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { StatStepper } from '@/components/admin/StatStepper';
 
 interface SignupWithProfile {
