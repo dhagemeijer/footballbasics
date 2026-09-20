@@ -261,11 +261,31 @@ export default function AdminAttendancePage() {
                   • {attendedCount} aanwezig
                 </span>
               </CardTitle>
-              <Button size="sm" onClick={() => { setIsAddDialogOpen(true); setSearchQuery(''); }}>
-                <UserPlus className="w-4 h-4 mr-1" />
-                <span className="hidden sm:inline">Speler toevoegen</span>
-                <span className="sm:hidden">Toevoegen</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Sorteren op naam"
+                  title="Sorteren op naam"
+                  className="h-8 w-8"
+                  onClick={() =>
+                    setSortDirection((prev) => (prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc'))
+                  }
+                >
+                  {sortDirection === 'asc' ? (
+                    <ArrowUp className="w-4 h-4" />
+                  ) : sortDirection === 'desc' ? (
+                    <ArrowDown className="w-4 h-4" />
+                  ) : (
+                    <ArrowUpDown className="w-4 h-4" />
+                  )}
+                </Button>
+                <Button size="sm" onClick={() => { setIsAddDialogOpen(true); setSearchQuery(''); }}>
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Speler toevoegen</span>
+                  <span className="sm:hidden">Toevoegen</span>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
