@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search } from 'lucide-react';
+import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { StatStepper } from '@/components/admin/StatStepper';
 
 interface SignupWithProfile {
@@ -53,6 +53,7 @@ export default function AdminAttendancePage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statsDrafts, setStatsDrafts] = useState<Record<string, StatsDraft>>({});
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('asc');
 
   // Fetch session details
   const { data: session, isLoading: sessionLoading } = useQuery({
@@ -99,6 +100,17 @@ export default function AdminAttendancePage() {
     },
     enabled: !!sessionId,
   });
+
+  const sortedSignups = useMemo(() => {
+    if (!signups) return undefined;
+    if (!sortDirection) return signups;
+    const dir = sortDirection === 'asc' ? 1 : -1;
+    return [...signups].sort((a, b) => {
+      const an = (a.profile.first_name || a.profile.username).toLowerCase();
+      const bn = (b.profile.first_name || b.profile.username).toLowerCase();
+      return an.localeCompare(bn, 'nl') * dir;
+    });
+  }, [signups, sortDirection]);
 
   // Fetch all profiles for adding players
   const { data: allProfiles } = useQuery({
@@ -249,20 +261,40 @@ export default function AdminAttendancePage() {
                   • {attendedCount} aanwezig
                 </span>
               </CardTitle>
-              <Button size="sm" onClick={() => { setIsAddDialogOpen(true); setSearchQuery(''); }}>
-                <UserPlus className="w-4 h-4 mr-1" />
-                <span className="hidden sm:inline">Speler toevoegen</span>
-                <span className="sm:hidden">Toevoegen</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Sorteren op naam"
+                  title="Sorteren op naam"
+                  className="h-8 w-8"
+                  onClick={() =>
+                    setSortDirection((prev) => (prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc'))
+                  }
+                >
+                  {sortDirection === 'asc' ? (
+                    <ArrowUp className="w-4 h-4" />
+                  ) : sortDirection === 'desc' ? (
+                    <ArrowDown className="w-4 h-4" />
+                  ) : (
+                    <ArrowUpDown className="w-4 h-4" />
+                  )}
+                </Button>
+                <Button size="sm" onClick={() => { setIsAddDialogOpen(true); setSearchQuery(''); }}>
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Speler toevoegen</span>
+                  <span className="sm:hidden">Toevoegen</span>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
-              ) : signups && signups.length > 0 ? (
+              ) : sortedSignups && sortedSignups.length > 0 ? (
                 <div className="space-y-2">
-                  {signups.map((signup) => {
+                  {sortedSignups.map((signup) => {
                     const draft = statsDrafts[signup.id] ?? {
                       crossbars_hit: signup.crossbars_hit?.toString() ?? '',
                       shooting_speed: signup.shooting_speed?.toString() ?? '',
