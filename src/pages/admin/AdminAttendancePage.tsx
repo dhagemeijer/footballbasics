@@ -101,6 +101,17 @@ export default function AdminAttendancePage() {
     enabled: !!sessionId,
   });
 
+  const sortedSignups = useMemo(() => {
+    if (!signups) return undefined;
+    if (!sortDirection) return signups;
+    const dir = sortDirection === 'asc' ? 1 : -1;
+    return [...signups].sort((a, b) => {
+      const an = (a.profile.first_name || a.profile.username).toLowerCase();
+      const bn = (b.profile.first_name || b.profile.username).toLowerCase();
+      return an.localeCompare(bn, 'nl') * dir;
+    });
+  }, [signups, sortDirection]);
+
   // Fetch all profiles for adding players
   const { data: allProfiles } = useQuery({
     queryKey: ['all-profiles-for-add'],
