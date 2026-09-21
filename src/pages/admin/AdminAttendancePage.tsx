@@ -200,6 +200,25 @@ export default function AdminAttendancePage() {
     },
   });
 
+  // Remove player from session
+  const removePlayerMutation = useMutation({
+    mutationFn: async (signupId: string) => {
+      const { error } = await supabase
+        .from('session_signups')
+        .delete()
+        .eq('id', signupId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-session-signups', sessionId] });
+      setRemoveSignup(null);
+      toast({ title: 'Speler verwijderd', description: 'De speler is verwijderd van deze training.' });
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
   if (authLoading) {
     return (
       <Layout>
