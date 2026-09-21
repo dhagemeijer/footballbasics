@@ -348,6 +348,16 @@ export default function AdminAttendancePage() {
                           {signup.attended && (
                             <span className="text-xs text-primary font-medium">Aanwezig</span>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            aria-label={`${signup.profile.first_name} verwijderen van deze training`}
+                            title="Verwijderen van deze training"
+                            onClick={() => setRemoveSignup(signup)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2">
@@ -467,6 +477,32 @@ export default function AdminAttendancePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Player Confirmation */}
+      <AlertDialog open={!!removeSignup} onOpenChange={(open) => !open && setRemoveSignup(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Speler verwijderen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je {removeSignup?.profile.first_name} wilt verwijderen van deze training?
+              De ingeschreven statistieken van deze training gaan dan ook verloren.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => removeSignup && removePlayerMutation.mutate(removeSignup.id)}
+            >
+              {removePlayerMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                'Verwijderen'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }
