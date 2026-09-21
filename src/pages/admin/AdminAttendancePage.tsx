@@ -9,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { StatStepper } from '@/components/admin/StatStepper';
 
 interface SignupWithProfile {
@@ -54,6 +55,7 @@ export default function AdminAttendancePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statsDrafts, setStatsDrafts] = useState<Record<string, StatsDraft>>({});
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('asc');
+  const [removeSignup, setRemoveSignup] = useState<SignupWithProfile | null>(null);
 
   // Fetch session details
   const { data: session, isLoading: sessionLoading } = useQuery({
