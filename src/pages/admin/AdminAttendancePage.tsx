@@ -9,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AvatarDisplay } from '@/components/AvatarDisplay';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, ArrowLeft, UserPlus, Calendar, Clock, MapPin, Search, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { StatStepper } from '@/components/admin/StatStepper';
 
 interface SignupWithProfile {
@@ -54,6 +55,7 @@ export default function AdminAttendancePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statsDrafts, setStatsDrafts] = useState<Record<string, StatsDraft>>({});
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('asc');
+  const [removeSignup, setRemoveSignup] = useState<SignupWithProfile | null>(null);
 
   // Fetch session details
   const { data: session, isLoading: sessionLoading } = useQuery({
@@ -198,6 +200,25 @@ export default function AdminAttendancePage() {
     },
   });
 
+  // Remove player from session
+  const removePlayerMutation = useMutation({
+    mutationFn: async (signupId: string) => {
+      const { error } = await supabase
+        .from('session_signups')
+        .delete()
+        .eq('id', signupId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-session-signups', sessionId] });
+      setRemoveSignup(null);
+      toast({ title: 'Speler verwijderd', description: 'De speler is verwijderd van deze training.' });
+    },
+    onError: (error) => {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    },
+  });
+
   if (authLoading) {
     return (
       <Layout>
@@ -327,6 +348,16 @@ export default function AdminAttendancePage() {
                           {signup.attended && (
                             <span className="text-xs text-primary font-medium">Aanwezig</span>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            aria-label={`${signup.profile.first_name} verwijderen van deze training`}
+                            title="Verwijderen van deze training"
+                            onClick={() => setRemoveSignup(signup)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2">
@@ -446,6 +477,32 @@ export default function AdminAttendancePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Player Confirmation */}
+      <AlertDialog open={!!removeSignup} onOpenChange={(open) => !open && setRemoveSignup(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Speler verwijderen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je {removeSignup?.profile.first_name} wilt verwijderen van deze training?
+              De ingeschreven statistieken van deze training gaan dan ook verloren.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => removeSignup && removePlayerMutation.mutate(removeSignup.id)}
+            >
+              {removePlayerMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                'Verwijderen'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 }
